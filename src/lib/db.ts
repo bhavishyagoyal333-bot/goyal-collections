@@ -115,7 +115,7 @@ const DEFAULT_SLIDES: BannerSlide[] = [
     badge: 'KIDS & JUNIORS',
     ctaText: 'EXPLORE KIDS',
     ctaLink: '/category/ready-made-clothes/kids-wear',
-    image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?q=80&w=1600&auto=format&fit=crop',
     active: true,
     order: 4,
   },

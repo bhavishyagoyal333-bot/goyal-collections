@@ -38,6 +38,11 @@ export default function HomePage() {
       {/* ================================================================= */}
       <div className="block md:hidden px-4 space-y-7 pt-2 pb-20">
 
+        {/* 1.0 Mobile Top Hero Slider Banner */}
+        <section aria-label="Hero Banner" className="-mx-4 sm:mx-0">
+          <HeroSlider />
+        </section>
+
         {/* 1.1 SINGLE Continuous Horizontal Looping Video Carousel */}
         <section aria-label="Fashion Category Video Carousel" className="-mx-4 px-4 overflow-hidden">
           <div className="flex items-center justify-between mb-2 px-1">
@@ -167,7 +172,7 @@ export default function HomePage() {
             subtitle="Organic cotton coordinates, varsity jackets & lightweight ergonomic footwear for boys and girls."
             ctaText="EXPLORE JUNIOR COLLECTION"
             href="/category/ready-made-clothes/kids-wear"
-            imageUrl="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800&auto=format&fit=crop"
+            imageUrl="https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?q=80&w=800&auto=format&fit=crop"
           />
 
           <div className="mt-4">

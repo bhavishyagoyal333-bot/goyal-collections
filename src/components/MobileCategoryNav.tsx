@@ -64,7 +64,7 @@ const MOBILE_CATEGORIES = [
     name: "Boys' Wear",
     shortName: "Boys' Wear",
     href: '/category/ready-made-clothes/boys-wear',
-    image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=300&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?q=80&w=300&auto=format&fit=crop',
     tag: '09',
   },
   {
