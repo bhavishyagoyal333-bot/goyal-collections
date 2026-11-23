@@ -119,7 +119,7 @@ export default function HomePage() {
             subtitle="Sculpted blazers, heavy Supima cottons & handcrafted oxfords designed for understated power."
             ctaText="EXPLORE MEN'S COLLECTION"
             href="/category/ready-made-clothes/mens-wear"
-            imageUrl="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop"
+            imageUrl="https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=800&auto=format&fit=crop"
           />
         </section>
 

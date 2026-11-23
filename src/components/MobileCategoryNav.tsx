@@ -43,7 +43,7 @@ const MOBILE_CATEGORIES = [
     name: "Men's Wear",
     shortName: "Men's Wear",
     href: '/category/ready-made-clothes/mens-wear',
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=300&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=300&auto=format&fit=crop',
     tag: '06',
   },
   {

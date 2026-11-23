@@ -104,7 +104,7 @@ const DEFAULT_SLIDES: BannerSlide[] = [
     badge: 'TIMELESS APPAREL',
     ctaText: 'SHOP READY-MADE',
     ctaLink: '/category/ready-made-clothes',
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600&auto=format&fit=crop',
     active: true,
     order: 3,
   },
