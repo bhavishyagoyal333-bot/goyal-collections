@@ -10,14 +10,14 @@ interface MirliLogoProps {
 
 export default function MirliLogo({ className = '', size = 'md', showTextOnMobile = true }: MirliLogoProps) {
   return (
-    <div className={`flex items-center gap-2 sm:gap-3 select-none ${className}`}>
+    <div className={`flex items-center justify-center gap-2 sm:gap-2.5 select-none ${className}`}>
       {/* Precision Vector Monogram Crest with Glassic Lens Frame */}
       <div className="p-0.5 sm:p-1 rounded-full bg-white/[0.08] border border-white/25 backdrop-blur-md shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.3),0_2px_8px_rgba(0,0,0,0.4)] shrink-0 flex items-center justify-center">
         <svg
           viewBox="0 0 44 44"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 transition-transform group-hover:scale-105"
+          className="w-5 h-5 min-[380px]:w-6 min-[380px]:h-6 sm:w-7 sm:h-7 shrink-0 transition-transform group-hover:scale-105"
           aria-hidden="true"
         >
           {/* Outer Circular Ring */}
@@ -48,10 +48,10 @@ export default function MirliLogo({ className = '', size = 'md', showTextOnMobil
 
       {/* Typography: GOYAL COLLECTIONS Wordmark & Subtitle */}
       <div className={`${showTextOnMobile ? 'flex' : 'hidden sm:flex'} flex-col justify-center text-left`}>
-        <span className="font-serif text-[11px] sm:text-lg lg:text-xl font-extrabold tracking-[0.16em] sm:tracking-[0.24em] text-white leading-none group-hover:tracking-[0.26em] transition-all whitespace-nowrap">
+        <span className="font-serif text-[11px] min-[380px]:text-[12px] sm:text-base lg:text-lg font-extrabold tracking-[0.14em] min-[380px]:tracking-[0.18em] sm:tracking-[0.22em] text-white leading-none group-hover:tracking-[0.24em] transition-all whitespace-nowrap">
           GOYAL COLLECTIONS
         </span>
-        <span className="text-[6px] sm:text-[8px] tracking-[0.26em] sm:tracking-[0.38em] text-neutral-300 uppercase font-mono mt-0.5 font-semibold whitespace-nowrap">
+        <span className="text-[5.5px] min-[380px]:text-[6px] sm:text-[7.5px] tracking-[0.22em] min-[380px]:tracking-[0.28em] sm:tracking-[0.34em] text-neutral-300 uppercase font-mono mt-0.5 font-semibold whitespace-nowrap">
           HAUTE COUTURE // ATELIER
         </span>
       </div>

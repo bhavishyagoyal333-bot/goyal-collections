@@ -71,9 +71,9 @@ export default function Header() {
         <div className="max-w-7xl mx-auto rounded-full glassic-header pointer-events-auto px-2.5 sm:px-5 py-1.5 sm:py-2 flex items-center justify-between border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] relative">
           
           {/* ======================================================= */}
-          {/* LEFT: Three-Line Hamburger Menu (+ Desktop Brand Logo)  */}
+          {/* LEFT: Three-Line Hamburger Menu (+ Desktop Nav Links)   */}
           {/* ======================================================= */}
-          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0 z-10">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 z-10">
             {/* Three-Line Hamburger Menu Button with Glassic Look */}
             <button
               type="button"
@@ -88,46 +88,43 @@ export default function Header() {
               </div>
             </button>
 
-            {/* Desktop Brand Logo (Shown on md+ screens) */}
-            <Link href="/" className="hidden md:flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
-              <MirliLogo />
-            </Link>
+            {/* Desktop Navigation Links on Left */}
+            <nav className="hidden lg:flex items-center gap-3.5 xl:gap-5 text-[11px] font-mono uppercase tracking-wider text-neutral-300">
+              <Link href="/shop" className="hover:text-white transition-colors">
+                Shop All
+              </Link>
+              <Link href="/category/footwear" className="hover:text-white transition-colors">
+                Footwear
+              </Link>
+              <Link href="/category/ready-made-clothes" className="hover:text-white transition-colors">
+                Ready-Made
+              </Link>
+            </nav>
           </div>
 
           {/* ======================================================= */}
-          {/* CENTER ON MOBILE: Symmetrically Centered Brand Logo     */}
+          {/* CENTER: DEAD-CENTER BRAND LOGO ON ALL SCREENS ("beech me") */}
           {/* ======================================================= */}
-          <div className="md:hidden absolute inset-x-0 mx-auto flex items-center justify-center pointer-events-none z-0 px-12">
-            <Link href="/" className="pointer-events-auto flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-20 pointer-events-auto">
+            <Link href="/" className="flex items-center group py-1" aria-label="GOYAL COLLECTIONS Homepage">
               <MirliLogo showTextOnMobile={true} />
             </Link>
           </div>
 
           {/* ======================================================= */}
-          {/* CENTER ON DESKTOP: Nav Links (CodeOrbit Pill Style)     */}
-          {/* ======================================================= */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-xs font-mono uppercase tracking-wider text-neutral-300">
-            <Link href="/shop" className="hover:text-white transition-colors">
-              Shop All
-            </Link>
-            <Link href="/category/footwear" className="hover:text-white transition-colors">
-              Footwear
-            </Link>
-            <Link href="/category/ready-made-clothes" className="hover:text-white transition-colors">
-              Ready-Made
-            </Link>
-            <Link href="/about" className="hover:text-white transition-colors">
-              Atelier
-            </Link>
-            <Link href="/contact" className="hover:text-white transition-colors">
-              Contact
-            </Link>
-          </nav>
-
-          {/* ======================================================= */}
-          {/* RIGHT: Wishlist + Cart + Profile Action Buttons         */}
+          {/* RIGHT: Desktop Extra Links + Wishlist + Cart + Profile  */}
           {/* ======================================================= */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end z-10">
+
+            {/* Desktop Extra Links on Right */}
+            <nav className="hidden xl:flex items-center gap-3.5 text-[11px] font-mono uppercase tracking-wider text-neutral-300 mr-2">
+              <Link href="/about" className="hover:text-white transition-colors">
+                Atelier
+              </Link>
+              <Link href="/contact" className="hover:text-white transition-colors">
+                Contact
+              </Link>
+            </nav>
 
             {/* Wishlist Icon */}
             <Link
