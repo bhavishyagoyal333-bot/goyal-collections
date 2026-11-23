@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'GOYAL COLLECTIONS — Haute Couture Fashion & Mastercrafted Footwear',
   description: 'GOYAL COLLECTIONS is India’s premier luxury fashion and footwear atelier. Discover architectural footwear and bespoke ready-made clothing.',
   keywords: 'GOYAL COLLECTIONS, luxury fashion, Indian designer shoes, men footwear, women footwear, ready-made clothes, minimal luxury',
+  verification: {
+    google: 'googlea2e23dd0ac54739f',
+  },
   openGraph: {
     title: 'GOYAL COLLECTIONS — Haute Couture Fashion & Mastercrafted Footwear',
     description: 'Explore minimalist monochrome luxury footwear and ready-made clothes crafted in India with international distinction.',
