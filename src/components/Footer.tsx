@@ -104,6 +104,19 @@ export default function Footer() {
                 </form>
               )}
             </div>
+
+            {/* Direct WhatsApp Concierge Link */}
+            <div className="pt-2">
+              <a
+                href="https://wa.me/919001725016?text=Hello%20Goyal%20Collections%2C%20I%20have%20an%20inquiry%20regarding%20products%20and%20orders."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 text-xs font-mono font-medium hover:bg-emerald-600 hover:text-white transition-all shadow-sm group"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#25D366] group-hover:bg-white animate-pulse" />
+                <span>WhatsApp: +91 90017 25016</span>
+              </a>
+            </div>
           </div>
 
           {/* Footwear Column */}

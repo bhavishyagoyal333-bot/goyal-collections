@@ -60,13 +60,21 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-full bg-neutral-100 border border-neutral-200 flex items-center justify-center shrink-0">
-                  <Phone className="w-4 h-4 text-black" />
+                <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div>
                   <span className="text-neutral-500 uppercase font-mono block">Direct Helpline / WhatsApp</span>
-                  <a href="tel:+919876543210" className="text-black font-semibold hover:underline text-sm">
-                    +91 98765 43210
+                  <a
+                    href="https://wa.me/919001725016?text=Hello%20Goyal%20Collections%2C%20I%20have%20an%20inquiry%20regarding%20an%20order"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-black font-bold hover:text-emerald-600 hover:underline text-sm flex items-center gap-1.5"
+                  >
+                    <span>+91 90017 25016</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-mono font-semibold">
+                      WhatsApp Available
+                    </span>
                   </a>
                   <p className="text-[11px] text-neutral-400 mt-0.5">Mon–Sat: 10:00 AM – 7:30 PM IST</p>
                 </div>

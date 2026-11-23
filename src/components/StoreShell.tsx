@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BottomFloatingCart from '@/components/BottomFloatingCart';
+import WhatsAppFloatingButton from '@/components/WhatsAppFloatingButton';
 import RealtimeListener from '@/components/RealtimeListener';
 
 export default function StoreShell({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default function StoreShell({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <BottomFloatingCart />
+      <WhatsAppFloatingButton />
       <Footer />
     </>
   );

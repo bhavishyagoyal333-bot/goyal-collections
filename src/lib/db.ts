@@ -127,7 +127,7 @@ const DEFAULT_SETTINGS: DatabaseSchema['settings'] = {
   freeShippingThreshold: 1999,
   standardShippingFee: 149,
   codEnabled: true,
-  contactPhone: '+91 98765 43210',
+  contactPhone: '+91 90017 25016',
   contactEmail: 'concierge@mirli.store',
   storeAddress: 'GOYAL COLLECTIONS Flagship Atelier, 42 Boulevard de Royale, New Delhi, India 110001',
   heroSlides: DEFAULT_SLIDES,
