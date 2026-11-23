@@ -110,30 +110,68 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 1.5 Men's Collection Promotional Banner */}
-        <section aria-label="Men's Collection Banner">
-          <MobilePromoBanner
-            badge="MEN'S ATELIER"
-            tagline="SARTORIAL RESTRAINT"
-            title="THE MEN'S EDIT"
-            subtitle="Sculpted blazers, heavy Supima cottons & handcrafted oxfords designed for understated power."
-            ctaText="EXPLORE MEN'S COLLECTION"
-            href="/category/ready-made-clothes/mens-wear"
-            imageUrl="https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=800&auto=format&fit=crop"
-          />
-        </section>
+        {/* 1.5 Dual Atelier: Men & Women 2-in-1 Side-by-Side (Compact & Ultra Luxury) */}
+        <section aria-label="Featured Ateliers: Men and Women" className="pt-1">
+          <div className="flex items-center justify-between pb-2 mb-3 border-b border-neutral-800">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-neutral-400 font-bold">
+              CURATED ATELIERS
+            </span>
+            <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">
+              MEN &amp; WOMEN (2-IN-1)
+            </span>
+          </div>
 
-        {/* 1.6 Women's Collection Promotional Banner */}
-        <section aria-label="Women's Collection Banner">
-          <MobilePromoBanner
-            badge="WOMEN'S ATELIER"
-            tagline="ARCHITECTURAL FORM"
-            title="THE WOMEN'S ATELIER"
-            subtitle="Minimalist trench coats, silk slip silhouettes & sculptural stiletto mules crafted for poise."
-            ctaText="EXPLORE WOMEN'S COLLECTION"
-            href="/category/ready-made-clothes/womens-wear"
-            imageUrl="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
-          />
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+            {/* 1. THE MEN'S EDIT */}
+            <Link
+              href="/category/ready-made-clothes/mens-wear"
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden aspect-[3/4] bg-neutral-950 border border-neutral-800/90 hover:border-white shadow-xl flex flex-col justify-end p-3 sm:p-4 transition-all"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=800&auto=format&fit=crop"
+                alt="The Men's Edit"
+                className="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
+              <div className="relative z-10 space-y-1">
+                <span className="inline-block px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[7.5px] font-mono uppercase tracking-wider text-white">
+                  MEN'S ATELIER
+                </span>
+                <h3 className="font-serif text-xs sm:text-base font-bold text-white tracking-wide leading-tight">
+                  THE MEN'S EDIT
+                </h3>
+                <span className="text-[9px] sm:text-xs font-mono text-neutral-300 group-hover:text-white flex items-center gap-1 transition-colors">
+                  <span>Explore Men</span>
+                  <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </div>
+            </Link>
+
+            {/* 2. THE WOMEN'S ATELIER */}
+            <Link
+              href="/category/ready-made-clothes/womens-wear"
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden aspect-[3/4] bg-neutral-950 border border-neutral-800/90 hover:border-white shadow-xl flex flex-col justify-end p-3 sm:p-4 transition-all"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
+                alt="The Women's Atelier"
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
+              <div className="relative z-10 space-y-1">
+                <span className="inline-block px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[7.5px] font-mono uppercase tracking-wider text-white">
+                  WOMEN'S ATELIER
+                </span>
+                <h3 className="font-serif text-xs sm:text-base font-bold text-white tracking-wide leading-tight">
+                  THE WOMEN'S ATELIER
+                </h3>
+                <span className="text-[9px] sm:text-xs font-mono text-neutral-300 group-hover:text-white flex items-center gap-1 transition-colors">
+                  <span>Explore Women</span>
+                  <ArrowRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </div>
+            </Link>
+          </div>
         </section>
 
         {/* 1.7 Best Sellers Section (2-Column Mobile Grid) */}

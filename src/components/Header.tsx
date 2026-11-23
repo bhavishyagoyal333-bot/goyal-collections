@@ -13,6 +13,8 @@ import {
   MapPin,
   AlertCircle,
   ChevronDown,
+  MessageCircle,
+  Phone,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -64,8 +66,9 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full glassic-header transition-all">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between relative">
+      {/* Floating Capsule Glassic Header (CodeOrbit Luxury Pill Navbar) */}
+      <header className="sticky top-2 sm:top-3.5 z-40 w-full px-2 sm:px-4 pointer-events-none transition-all">
+        <div className="max-w-7xl mx-auto rounded-full glassic-header pointer-events-auto px-2.5 sm:px-5 py-1.5 sm:py-2 flex items-center justify-between border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] relative">
           
           {/* ======================================================= */}
           {/* LEFT: Three-Line Hamburger Menu (+ Desktop Brand Logo)  */}
@@ -75,7 +78,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="glassic-btn p-2 sm:p-2.5 rounded-full text-white flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-white/40 active:scale-95 shadow-sm"
+              className="glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-white/40 active:scale-95 shadow-sm"
               aria-label="Open Navigation Menu"
             >
               <div className="w-4 h-3 flex flex-col justify-between">
@@ -101,23 +104,53 @@ export default function Header() {
           </div>
 
           {/* ======================================================= */}
-          {/* CENTER ON DESKTOP: Prominent Desktop SHOP Button       */}
+          {/* CENTER ON DESKTOP: Nav Links (CodeOrbit Pill Style)     */}
           {/* ======================================================= */}
-          <div className="hidden md:flex items-center justify-center px-4">
-            <Link
-              href="/shop"
-              className="bg-white text-black hover:bg-neutral-200 active:scale-95 px-6 sm:px-8 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-md text-center border border-white"
-            >
-              SHOP
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-xs font-mono uppercase tracking-wider text-neutral-300">
+            <Link href="/shop" className="hover:text-white transition-colors">
+              Shop All
             </Link>
-          </div>
+            <Link href="/category/footwear" className="hover:text-white transition-colors">
+              Footwear
+            </Link>
+            <Link href="/category/ready-made-clothes" className="hover:text-white transition-colors">
+              Ready-Made
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
+              Atelier
+            </Link>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact
+            </Link>
+          </nav>
 
           {/* ======================================================= */}
-          {/* RIGHT: Profile Icon + Shopping Bag Icon with Glassic    */}
+          {/* RIGHT: Phone + WhatsApp + Wishlist + Cart + Profile     */}
           {/* ======================================================= */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 justify-end z-10">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end z-10">
             
-            {/* Wishlist Icon (Desktop Only to keep Mobile Compact) */}
+            {/* Phone Number Pill (CodeOrbit Matching Style) */}
+            <a
+              href="tel:+919001725016"
+              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-[11px] font-mono text-neutral-300 transition-all"
+            >
+              <Phone className="w-3 h-3 text-neutral-400" />
+              <span>+91 90017 25016</span>
+            </a>
+
+            {/* Green WhatsApp Quote Pill (CodeOrbit Matching Style) */}
+            <a
+              href="https://wa.me/919001725016?text=Hello%20GOYAL%20COLLECTIONS%2C%20I%20would%20like%20to%20inquire%20about%20your%20luxury%20collection."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-[11px] font-bold transition-all shadow-md active:scale-95 shrink-0"
+              title="Chat on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 fill-white text-white shrink-0" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+
+            {/* Wishlist Icon */}
             <Link
               href="/wishlist"
               className="hidden sm:flex glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full items-center justify-center text-white relative group"
