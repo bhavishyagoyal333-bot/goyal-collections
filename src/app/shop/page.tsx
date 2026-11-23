@@ -17,7 +17,10 @@ function matchTargetGroup(product: Product, selectedGenders: string[]): boolean 
     sub.includes('kids') ||
     sub.includes('boy') ||
     sub.includes('girl') ||
-    name.includes('junior');
+    name.includes('junior') ||
+    name.includes('kids') ||
+    name.includes("boy") ||
+    name.includes("girl");
 
   const isWomen =
     !isKids &&
@@ -26,7 +29,11 @@ function matchTargetGroup(product: Product, selectedGenders: string[]): boolean 
       name.includes('stiletto') ||
       name.includes('mule') ||
       name.includes('dress') ||
-      name.includes('athena') ||
+      name.includes('kurti') ||
+      name.includes('anarkali') ||
+      name.includes('palazzo') ||
+      name.includes('heel') ||
+      name.includes('flat') ||
       name.includes('women'));
 
   const isMen =
@@ -34,11 +41,16 @@ function matchTargetGroup(product: Product, selectedGenders: string[]): boolean 
     (sub === 'mens-footwear' ||
       sub === 'mens-wear' ||
       sub === 'shoes' ||
-      (sub === 'sandals-slippers' && !name.includes('athena')) ||
+      sub === 'sandals-slippers' ||
       name.includes('chelsea') ||
       name.includes('monk') ||
+      name.includes('oxford') ||
+      name.includes('brogue') ||
+      name.includes('loafer') ||
       name.includes('derby') ||
       name.includes('blazer') ||
+      name.includes('kurta') ||
+      name.includes('chino') ||
       name.includes('tee') ||
       name.includes('men'));
 
@@ -142,6 +154,10 @@ function ShopContent() {
     }
 
     // 2. Price filter
+    if (priceRange === 'under-1000' && product.price >= 1000) return false;
+    if (priceRange === '1000-1500' && (product.price < 1000 || product.price > 1500)) return false;
+    if (priceRange === 'above-1500' && product.price <= 1500) return false;
+    // Legacy ranges compatibility
     if (priceRange === 'under-3000' && product.price >= 3000) return false;
     if (priceRange === '3000-6000' && (product.price < 3000 || product.price > 6000)) return false;
     if (priceRange === 'above-6000' && product.price <= 6000) return false;
@@ -335,9 +351,9 @@ function ShopContent() {
                     <div className="grid grid-cols-2 gap-1.5 text-xs">
                       {[
                         { id: 'all', label: 'Any Price' },
-                        { id: 'under-3000', label: 'Under ₹3,000' },
-                        { id: '3000-6000', label: '₹3,000 – ₹6,000' },
-                        { id: 'above-6000', label: 'Above ₹6,000' },
+                        { id: 'under-1000', label: 'Under ₹1,000' },
+                        { id: '1000-1500', label: '₹1,000 – ₹1,500' },
+                        { id: 'above-1500', label: 'Above ₹1,500' },
                       ].map((p) => (
                         <button
                           key={p.id}
@@ -481,6 +497,9 @@ function ShopContent() {
             {priceRange !== 'all' && (
               <span className="px-2.5 py-0.5 rounded-full bg-neutral-900 text-white border border-neutral-700 flex items-center gap-1.5 font-medium text-xs">
                 <span>
+                  {priceRange === 'under-1000' && 'Under ₹1,000'}
+                  {priceRange === '1000-1500' && '₹1,000 – ₹1,500'}
+                  {priceRange === 'above-1500' && 'Above ₹1,500'}
                   {priceRange === 'under-3000' && 'Under ₹3,000'}
                   {priceRange === '3000-6000' && '₹3,000 – ₹6,000'}
                   {priceRange === 'above-6000' && 'Above ₹6,000'}
