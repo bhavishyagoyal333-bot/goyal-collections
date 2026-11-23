@@ -291,7 +291,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             
             {/* Thumbnails column */}
             <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto pb-1 md:pb-0 shrink-0 scrollbar-none">
-              {product.images.map((img, idx) => (
+              {(product.images || []).map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
@@ -299,7 +299,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                     activeImageIdx === idx ? 'border-white ring-1 ring-white shadow-md' : 'border-neutral-800 opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`${product.name} ${idx + 1}`} loading="lazy" className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${product.name} ${idx + 1}`}
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop';
+                    }}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -307,10 +316,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             {/* Main Large Image Stage: Eager decoding prevents layout shift and flashing */}
             <div className="relative flex-1 aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-950 border border-neutral-800 group">
               <img
-                src={product.images[activeImageIdx] || product.images[0]}
+                src={product.images?.[activeImageIdx] || product.images?.[0] || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200&auto=format&fit=crop'}
                 alt={product.name}
                 loading="eager"
                 decoding="async"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200&auto=format&fit=crop';
+                }}
                 className="w-full h-full object-cover transition-transform duration-500 cursor-zoom-in group-hover:scale-105 filter contrast-105"
                 onClick={() => setIsZoomOpen(true)}
               />

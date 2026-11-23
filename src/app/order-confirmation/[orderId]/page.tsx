@@ -131,8 +131,12 @@ export default function OrderConfirmationPage({ params }: { params: { orderId: s
               <div key={idx} className="py-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <img
-                    src={item.image}
+                    src={item.image || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200'}
                     alt={item.name}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200';
+                    }}
                     className="w-16 h-20 object-cover rounded-xl bg-neutral-100 border border-neutral-200"
                   />
                   <div>

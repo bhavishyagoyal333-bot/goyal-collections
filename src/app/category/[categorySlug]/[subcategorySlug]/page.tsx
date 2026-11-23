@@ -48,22 +48,36 @@ export default function SubcategoryPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 w-full">
         
         {/* Subcategory Banner Card */}
-        <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
-          <div className="space-y-2 max-w-xl">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-400 font-bold block">
-              {category.name.toUpperCase()} // CURATED LINE
-            </span>
-            <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white">
-              {subcategory.name}
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-              {subcategory.description}
-            </p>
+        <div className="rounded-3xl bg-neutral-900 border border-neutral-800 p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+          <div className="flex items-center gap-5 sm:gap-6 z-10">
+            {subcategory.image && (
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 border border-neutral-700 bg-neutral-950 shadow-md">
+                <img
+                  src={subcategory.image}
+                  alt={subcategory.name}
+                  className="w-full h-full object-cover filter contrast-105"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=600';
+                  }}
+                />
+              </div>
+            )}
+            <div className="space-y-1 sm:space-y-2 max-w-xl">
+              <span className="text-[10px] uppercase font-mono tracking-widest text-neutral-400 font-bold block">
+                {category.name.toUpperCase()} // CURATED SILHOUETTE
+              </span>
+              <h1 className="font-serif text-2xl sm:text-4xl font-extrabold text-white">
+                {subcategory.name}
+              </h1>
+              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed line-clamp-2 sm:line-clamp-none">
+                {subcategory.description}
+              </p>
+            </div>
           </div>
 
           <Link
             href={`/category/${category.slug}`}
-            className="bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 shrink-0 shadow-sm transition-colors"
+            className="bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 shrink-0 shadow-sm transition-colors z-10 self-start md:self-auto"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>All {category.name}</span>

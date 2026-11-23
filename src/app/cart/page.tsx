@@ -142,8 +142,12 @@ export default function CartPage() {
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <img
-                      src={item.image}
+                      src={item.image || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400'}
                       alt={item.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400';
+                      }}
                       className="w-20 h-24 sm:w-22 sm:h-26 object-cover rounded-xl bg-neutral-950 border border-neutral-800 shrink-0"
                     />
                     <div className="space-y-1 min-w-0">

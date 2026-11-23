@@ -1765,8 +1765,12 @@ export default function AdminDashboardPage() {
                         <div key={p.id} className="flex items-center justify-between gap-3 text-xs">
                           <div className="flex items-center gap-3">
                             <img
-                              src={p.images[0]}
+                              src={p.images?.[0] || 'https://images.unsplash.com/photo-1549298916-b41d501d3772'}
                               alt=""
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src =
+                                  'https://images.unsplash.com/photo-1549298916-b41d501d3772';
+                              }}
                               className="w-10 h-10 rounded-xl object-cover bg-neutral-950"
                             />
                             <div>
@@ -1936,8 +1940,12 @@ export default function AdminDashboardPage() {
                           <td className="py-3.5">
                             <div className="flex items-center gap-3 font-sans">
                               <img
-                                src={p.images[0] || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000'}
+                                src={p.images?.[0] || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000'}
                                 alt={p.name}
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src =
+                                    'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200';
+                                }}
                                 className="w-12 h-12 rounded-xl object-cover bg-neutral-950 shrink-0 border border-neutral-800"
                               />
                               <div className="min-w-0 max-w-xs">
@@ -2095,6 +2103,10 @@ export default function AdminDashboardPage() {
                         <img
                           src={cat.image}
                           alt={cat.name}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400';
+                          }}
                           className="w-14 h-14 rounded-2xl object-cover bg-neutral-950"
                         />
                         <div>

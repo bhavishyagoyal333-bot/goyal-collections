@@ -21,11 +21,14 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const [addedSuccess, setAddedSuccess] = useState(false);
 
   const isFavorited = isInWishlist(product.id);
-  const primaryImg = product.images[0] || 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop';
-  const secondaryImg = product.images[1] || primaryImg;
+  const defaultFallback = 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop';
+  const primaryImg = product.images?.[0] || defaultFallback;
+  const secondaryImg = product.images?.[1] || primaryImg;
+
+  const [imgError, setImgError] = useState(false);
 
   const handleQuickAdd = (size: string) => {
-    addToCart(product, size, product.colors[0] || { name: 'Monochrome', hex: '#000000' }, 1);
+    addToCart(product, size, product.colors?.[0] || { name: 'Monochrome', hex: '#000000' }, 1);
     setQuickSizeOpen(false);
     setAddedSuccess(true);
     setTimeout(() => setAddedSuccess(false), 2000);
@@ -44,9 +47,10 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg sm:rounded-xl bg-neutral-950 mb-2">
         <Link href={`/product/${product.slug}`} className="block w-full h-full">
           <img
-            src={isHovered ? secondaryImg : primaryImg}
+            src={imgError ? defaultFallback : (isHovered ? secondaryImg : primaryImg)}
             alt={product.name}
             loading={priority ? 'eager' : 'lazy'}
+            onError={() => setImgError(true)}
             className="w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-105 filter contrast-105"
           />
         </Link>

@@ -265,13 +265,33 @@ function OrderTrackingContent() {
 
             <div>
               <span className="text-neutral-400 uppercase font-mono block mb-2">Package Contents</span>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {order.items.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-white font-medium truncate max-w-[200px]">
-                      {item.name} ({item.size})
-                    </span>
-                    <span className="font-mono text-neutral-400">Qty {item.quantity}</span>
+                  <div key={i} className="flex items-center justify-between gap-3 p-2 rounded-xl bg-neutral-900 border border-neutral-800">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-10 h-12 object-cover rounded-lg bg-neutral-950 shrink-0 border border-neutral-800"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=200';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-10 h-12 rounded-lg bg-neutral-950 border border-neutral-800 shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <span className="text-white font-medium text-xs truncate block max-w-[180px] sm:max-w-xs">
+                          {item.name}
+                        </span>
+                        <span className="text-[11px] text-neutral-400 font-mono block">
+                          Size: {item.size} • Color: {item.color?.name || 'Standard'}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-mono text-xs text-neutral-300 font-bold shrink-0">Qty {item.quantity}</span>
                   </div>
                 ))}
               </div>
