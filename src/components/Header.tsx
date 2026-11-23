@@ -71,14 +71,14 @@ export default function Header() {
         <div className="max-w-7xl mx-auto rounded-full glassic-header pointer-events-auto px-2.5 sm:px-5 py-1.5 sm:py-2 flex items-center justify-between border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] relative">
           
           {/* ======================================================= */}
-          {/* LEFT: Three-Line Hamburger Menu (+ Desktop Nav Links)   */}
+          {/* LEFT: Three-Line Hamburger Menu + Brand Logo (LEFT SIDE) */}
           {/* ======================================================= */}
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0 z-10">
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0 z-10">
             {/* Three-Line Hamburger Menu Button with Glassic Look */}
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-white/40 active:scale-95 shadow-sm"
+              className="glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-white/40 active:scale-95 shadow-sm shrink-0"
               aria-label="Open Navigation Menu"
             >
               <div className="w-4 h-3 flex flex-col justify-between">
@@ -88,43 +88,37 @@ export default function Header() {
               </div>
             </button>
 
-            {/* Desktop Navigation Links on Left */}
-            <nav className="hidden lg:flex items-center gap-3.5 xl:gap-5 text-[11px] font-mono uppercase tracking-wider text-neutral-300">
-              <Link href="/shop" className="hover:text-white transition-colors">
-                Shop All
-              </Link>
-              <Link href="/category/footwear" className="hover:text-white transition-colors">
-                Footwear
-              </Link>
-              <Link href="/category/ready-made-clothes" className="hover:text-white transition-colors">
-                Ready-Made
-              </Link>
-            </nav>
-          </div>
-
-          {/* ======================================================= */}
-          {/* CENTER: DEAD-CENTER BRAND LOGO ON ALL SCREENS ("beech me") */}
-          {/* ======================================================= */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-20 pointer-events-auto">
+            {/* Brand Logo with Name on LEFT SIDE (Always visible, perfectly unobstructed) */}
             <Link href="/" className="flex items-center group py-1" aria-label="GOYAL COLLECTIONS Homepage">
               <MirliLogo showTextOnMobile={true} />
             </Link>
           </div>
 
           {/* ======================================================= */}
-          {/* RIGHT: Desktop Extra Links + Wishlist + Cart + Profile  */}
+          {/* CENTER ON DESKTOP: Nav Links (CodeOrbit Pill Style)     */}
+          {/* ======================================================= */}
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-xs font-mono uppercase tracking-wider text-neutral-300">
+            <Link href="/shop" className="hover:text-white transition-colors">
+              Shop All
+            </Link>
+            <Link href="/category/footwear" className="hover:text-white transition-colors">
+              Footwear
+            </Link>
+            <Link href="/category/ready-made-clothes" className="hover:text-white transition-colors">
+              Ready-Made
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
+              Atelier
+            </Link>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact
+            </Link>
+          </nav>
+
+          {/* ======================================================= */}
+          {/* RIGHT: Wishlist + Cart + Profile Action Buttons         */}
           {/* ======================================================= */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end z-10">
-
-            {/* Desktop Extra Links on Right */}
-            <nav className="hidden xl:flex items-center gap-3.5 text-[11px] font-mono uppercase tracking-wider text-neutral-300 mr-2">
-              <Link href="/about" className="hover:text-white transition-colors">
-                Atelier
-              </Link>
-              <Link href="/contact" className="hover:text-white transition-colors">
-                Contact
-              </Link>
-            </nav>
 
             {/* Wishlist Icon */}
             <Link
@@ -174,93 +168,99 @@ export default function Header() {
                 )}
               </button>
 
-              {/* Profile Dropdown Menu */}
+              {/* Profile Dropdown Menu with Solid Dark Background for Perfect Visibility */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl glassic-card p-2.5 z-50 animate-fade-in text-xs font-sans text-white">
+                <div className="absolute right-0 mt-3 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-neutral-950/98 backdrop-blur-2xl border border-white/20 p-3 z-50 animate-fade-in text-xs font-sans text-white shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
                   {user ? (
                     /* Logged In State */
                     <div>
                       {/* Customer Name Header */}
-                      <div className="p-3 border-b border-neutral-800/80 mb-1.5 bg-neutral-900/50 rounded-xl">
-                        <span className="text-[10px] font-mono uppercase text-neutral-400 block tracking-wider">
-                          Signed In As
+                      <div className="p-3.5 border border-white/10 mb-2 bg-white/[0.05] rounded-xl shadow-inner">
+                        <span className="text-[10px] font-mono uppercase text-neutral-400 block tracking-widest font-bold">
+                          SIGNED IN AS
                         </span>
-                        <span className="font-bold text-white block truncate text-sm mt-0.5">{user.name}</span>
-                        <span className="text-neutral-400 font-mono text-[10px] block truncate">{user.email}</span>
+                        <span className="font-bold text-white block truncate text-sm sm:text-base mt-1">
+                          {user.name}
+                        </span>
+                        <span className="text-neutral-400 font-mono text-[11px] block truncate mt-0.5">
+                          {user.email}
+                        </span>
                       </div>
 
                       {/* Logged-In Options */}
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         <Link
                           href="/account"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-neutral-900 transition-colors"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
                         >
-                          <User className="w-4 h-4 text-neutral-400" />
+                          <User className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>My Account</span>
                         </Link>
                         <Link
                           href="/account/orders"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-neutral-900 transition-colors"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
                         >
-                          <Package className="w-4 h-4 text-neutral-400" />
+                          <Package className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>My Orders</span>
                         </Link>
                         <Link
                           href="/account"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-neutral-900 transition-colors"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
                         >
-                          <MapPin className="w-4 h-4 text-neutral-400" />
+                          <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>Saved Addresses</span>
                         </Link>
                         <Link
                           href="/wishlist"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-neutral-900 transition-colors"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
                         >
-                          <Heart className="w-4 h-4 text-neutral-400" />
+                          <Heart className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>Wishlist ({wishlistCount})</span>
                         </Link>
                       </div>
 
                       {/* Single Confirmed Logout Trigger */}
-                      <div className="border-t border-neutral-800 pt-1.5 mt-1.5">
+                      <div className="border-t border-white/10 pt-2 mt-2">
                         <button
                           type="button"
                           onClick={() => {
                             setIsProfileOpen(false);
                             setShowLogoutConfirm(true);
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-red-400 hover:bg-red-950/40 hover:text-red-300 active:bg-red-950/60 transition-colors text-left font-medium text-xs sm:text-sm"
                         >
-                          <LogOut className="w-4 h-4" />
-                          <span className="font-semibold">Logout</span>
+                          <LogOut className="w-4 h-4 shrink-0" />
+                          <span>Logout</span>
                         </button>
                       </div>
                     </div>
                   ) : (
                     /* Logged Out State: Only Sign In & Register */
-                    <div className="p-3">
-                      <span className="font-serif font-bold text-white block text-sm mb-1">
-                        Welcome to GOYAL COLLECTIONS
-                      </span>
-                      <p className="text-neutral-400 text-[11px] leading-relaxed mb-3">
-                        Sign in to access your orders, saved addresses and exclusive drops.
-                      </p>
-                      <div className="flex gap-2">
+                    <div className="p-3.5">
+                      <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 mb-3">
+                        <span className="font-serif font-bold text-white block text-sm mb-1">
+                          Welcome to GOYAL COLLECTIONS
+                        </span>
+                        <p className="text-neutral-300 text-[11px] leading-relaxed">
+                          Sign in to access your orders, saved addresses and exclusive drops.
+                        </p>
+                      </div>
+                      <div className="flex gap-2.5">
                         <Link
                           href="/login"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex-1 text-center bg-white hover:bg-neutral-200 text-black py-2 rounded-full text-xs font-bold transition-colors"
+                          className="flex-1 text-center bg-white hover:bg-neutral-200 text-black py-2.5 rounded-full text-xs font-bold transition-all shadow-md active:scale-95"
                         >
                           Sign In
                         </Link>
                         <Link
                           href="/signup"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex-1 text-center bg-neutral-900 hover:bg-neutral-800 text-white py-2 rounded-full text-xs font-semibold transition-colors border border-neutral-700"
+                          className="flex-1 text-center bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-full text-xs font-semibold transition-all border border-white/20 active:scale-95"
                         >
                           Register
                         </Link>
