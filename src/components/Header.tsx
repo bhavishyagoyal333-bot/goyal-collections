@@ -168,14 +168,14 @@ export default function Header() {
                 )}
               </button>
 
-              {/* Profile Dropdown Menu with Solid Dark Background for Perfect Visibility */}
+              {/* Profile Dropdown Menu with 100% Solid Dark Background for Perfect Visibility */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-3 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-neutral-950/98 backdrop-blur-2xl border border-white/20 p-3 z-50 animate-fade-in text-xs font-sans text-white shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)]">
+                <div className="absolute right-0 mt-3 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-neutral-950 border border-neutral-800 p-3 z-50 animate-fade-in text-xs font-sans text-white shadow-[0_24px_70px_rgba(0,0,0,1),0_0_0_1px_rgba(255,255,255,0.06)]">
                   {user ? (
                     /* Logged In State */
                     <div>
                       {/* Customer Name Header */}
-                      <div className="p-3.5 border border-white/10 mb-2 bg-white/[0.05] rounded-xl shadow-inner">
+                      <div className="p-3.5 border border-neutral-800 mb-2 bg-neutral-900 rounded-xl shadow-inner">
                         <span className="text-[10px] font-mono uppercase text-neutral-400 block tracking-widest font-bold">
                           SIGNED IN AS
                         </span>
@@ -192,7 +192,7 @@ export default function Header() {
                         <Link
                           href="/account"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-neutral-900 active:bg-neutral-800 transition-colors font-medium text-xs sm:text-sm"
                         >
                           <User className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>My Account</span>
@@ -200,7 +200,7 @@ export default function Header() {
                         <Link
                           href="/account/orders"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-neutral-900 active:bg-neutral-800 transition-colors font-medium text-xs sm:text-sm"
                         >
                           <Package className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>My Orders</span>
@@ -208,7 +208,7 @@ export default function Header() {
                         <Link
                           href="/account"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-neutral-900 active:bg-neutral-800 transition-colors font-medium text-xs sm:text-sm"
                         >
                           <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>Saved Addresses</span>
@@ -216,7 +216,7 @@ export default function Header() {
                         <Link
                           href="/wishlist"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-white/10 active:bg-white/15 transition-colors font-medium text-xs sm:text-sm"
+                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-neutral-200 hover:text-white hover:bg-neutral-900 active:bg-neutral-800 transition-colors font-medium text-xs sm:text-sm"
                         >
                           <Heart className="w-4 h-4 text-neutral-400 shrink-0" />
                           <span>Wishlist ({wishlistCount})</span>
@@ -224,7 +224,7 @@ export default function Header() {
                       </div>
 
                       {/* Single Confirmed Logout Trigger */}
-                      <div className="border-t border-white/10 pt-2 mt-2">
+                      <div className="border-t border-neutral-800 pt-2 mt-2">
                         <button
                           type="button"
                           onClick={() => {
@@ -241,7 +241,7 @@ export default function Header() {
                   ) : (
                     /* Logged Out State: Only Sign In & Register */
                     <div className="p-3.5">
-                      <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10 mb-3">
+                      <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 mb-3">
                         <span className="font-serif font-bold text-white block text-sm mb-1">
                           Welcome to GOYAL COLLECTIONS
                         </span>
@@ -260,7 +260,7 @@ export default function Header() {
                         <Link
                           href="/signup"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex-1 text-center bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-full text-xs font-semibold transition-all border border-white/20 active:scale-95"
+                          className="flex-1 text-center bg-neutral-900 hover:bg-neutral-800 text-white py-2.5 rounded-full text-xs font-semibold transition-all border border-neutral-700 active:scale-95"
                         >
                           Register
                         </Link>
