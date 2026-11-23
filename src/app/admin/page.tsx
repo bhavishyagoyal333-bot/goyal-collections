@@ -244,6 +244,7 @@ export default function AdminDashboardPage() {
     origin: 'Handcrafted in Agra, India',
     designInfo: 'Anatomical contours with sharp elongated silhouette.',
     careInfo: 'Buff with neutral beeswax cream. Store in breathable canvas dust cover.',
+    videoUrl: '',
   });
 
   // Category Form State
@@ -608,6 +609,7 @@ export default function AdminDashboardPage() {
       origin: 'Handcrafted in Agra, India',
       designInfo: 'Anatomical contours with sharp elongated silhouette.',
       careInfo: 'Buff with neutral beeswax cream. Store in breathable canvas dust cover.',
+      videoUrl: '',
     });
     setIsProductModalOpen(true);
   };
@@ -643,6 +645,7 @@ export default function AdminDashboardPage() {
       origin: getSpecVal('origin') || 'Handcrafted in Agra, India',
       designInfo: prod.designInfo || 'Anatomical contours with sharp elongated silhouette.',
       careInfo: prod.careInfo || 'Store in breathable canvas dust bag.',
+      videoUrl: prod.videoUrl || '',
     });
     setIsProductModalOpen(true);
   };
@@ -678,6 +681,7 @@ export default function AdminDashboardPage() {
       description: prodForm.description,
       designInfo: prodForm.designInfo,
       careInfo: prodForm.careInfo,
+      videoUrl: prodForm.videoUrl || undefined,
       images: prodForm.images.filter(Boolean),
       sizes: sizesArr,
       colors: colorsArr,
@@ -3380,6 +3384,18 @@ export default function AdminDashboardPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Video URL */}
+              <div>
+                <label className="block text-neutral-400 mb-1">PRODUCT VIDEO URL (OPTIONAL - MP4 / YOUTUBE)</label>
+                <input
+                  type="url"
+                  value={prodForm.videoUrl || ''}
+                  onChange={(e) => setProdForm({ ...prodForm, videoUrl: e.target.value })}
+                  placeholder="e.g. https://www.youtube.com/watch?v=... or direct MP4 URL"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white"
+                />
               </div>
 
               {/* Sizes and Color */}

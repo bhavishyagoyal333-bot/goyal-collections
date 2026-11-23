@@ -43,6 +43,9 @@ export interface Product {
   colors: ProductColor[];
   stock: number;
   status?: 'active' | 'inactive';
+  videoUrl?: string;
+  brand?: string;
+  costPrice?: number;
   designInfo?: string;
   careInfo?: string;
   rating: number;

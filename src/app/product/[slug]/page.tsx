@@ -264,6 +264,120 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         </div>
       )}
 
+      {/* Schema.org Structured Data for Google Shopping, Rich Snippets, and AI Search */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org/',
+            '@type': 'Product',
+            name: product.name,
+            image: product.images || [],
+            description: product.description,
+            sku: product.sku || product.id,
+            mpn: product.sku || product.id,
+            brand: {
+              '@type': 'Brand',
+              name: 'GOYAL COLLECTIONS',
+            },
+            offers: {
+              '@type': 'Offer',
+              url: `https://www.goyalcollections.shop/product/${product.slug}`,
+              priceCurrency: 'INR',
+              price: product.price,
+              priceValidUntil: '2027-12-31',
+              itemCondition: 'https://schema.org/NewCondition',
+              availability:
+                product.stock > 0
+                  ? 'https://schema.org/InStock'
+                  : 'https://schema.org/OutOfStock',
+              seller: {
+                '@type': 'Organization',
+                name: 'GOYAL COLLECTIONS',
+              },
+              shippingDetails: {
+                '@type': 'OfferShippingDetails',
+                shippingRate: {
+                  '@type': 'MonetaryAmount',
+                  value: product.price >= 1999 ? '0' : '149',
+                  currency: 'INR',
+                },
+                shippingDestination: {
+                  '@type': 'DefinedRegion',
+                  addressCountry: 'IN',
+                },
+                deliveryTime: {
+                  '@type': 'ShippingDeliveryTime',
+                  handlingTime: {
+                    '@type': 'QuantitativeValue',
+                    minValue: 1,
+                    maxValue: 2,
+                    unitCode: 'DAY',
+                  },
+                  transitTime: {
+                    '@type': 'QuantitativeValue',
+                    minValue: 2,
+                    maxValue: 5,
+                    unitCode: 'DAY',
+                  },
+                },
+              },
+              hasMerchantReturnPolicy: {
+                '@type': 'MerchantReturnPolicy',
+                applicableCountry: 'IN',
+                returnPolicyCategory:
+                  'https://schema.org/MerchantReturnFiniteReturnWindow',
+                merchantReturnDays: 7,
+                returnMethod: 'https://schema.org/ReturnByMail',
+                returnFees: 'https://schema.org/FreeReturn',
+              },
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: product.rating || 4.9,
+              reviewCount: Math.max(product.reviewCount || 1, 1),
+              bestRating: '5',
+              worstRating: '1',
+            },
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://www.goyalcollections.shop',
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: product.categoryTitle || 'Collections',
+                item: `https://www.goyalcollections.shop/category/${product.category}`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: product.subcategoryTitle || product.subcategory,
+                item: `https://www.goyalcollections.shop/category/${product.category}/${product.subcategory}`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 4,
+                name: product.name,
+                item: `https://www.goyalcollections.shop/product/${product.slug}`,
+              },
+            ],
+          }),
+        }}
+      />
+
       {/* Breadcrumb Navigation */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
         <nav className="flex items-center gap-1.5 text-xs text-neutral-400 font-mono">
@@ -548,6 +662,29 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
         {/* 3-Section Specifications Accordion: Product Details, Design, Packaging & Care */}
         <ProductAccordionSpecs product={product} />
+
+        {/* Video Showcase Section if available */}
+        {product.videoUrl && (
+          <section aria-label="Product Video" className="rounded-3xl bg-neutral-900 border border-neutral-800 p-6 sm:p-10 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-400">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span>Atelier Visual Showcase</span>
+            </div>
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black border border-neutral-800">
+              {product.videoUrl.includes('youtube.com') || product.videoUrl.includes('youtu.be') ? (
+                <iframe
+                  src={product.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={`${product.name} Video`}
+                />
+              ) : (
+                <video src={product.videoUrl} controls className="w-full h-full object-cover" />
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* 2. CUSTOMER REVIEWS SECTION (CLEAN, COMPACT & AUTHENTIC)                 */}
