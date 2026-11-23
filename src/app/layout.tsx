@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import StoreShell from '@/components/StoreShell';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.goyalcollections.shop'),
   title: 'GOYAL COLLECTIONS — Haute Couture Fashion & Mastercrafted Footwear',
   description: 'GOYAL COLLECTIONS is India’s premier luxury fashion and footwear atelier. Discover architectural footwear and bespoke ready-made clothing.',
   keywords: 'GOYAL COLLECTIONS, luxury fashion, Indian designer shoes, men footwear, women footwear, ready-made clothes, minimal luxury',

@@ -3,7 +3,7 @@ import { getProducts } from '@/lib/db';
 import { CATEGORIES } from '@/lib/initialData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://mirli.store';
+  const baseUrl = 'https://www.goyalcollections.shop';
   const { products } = getProducts();
 
   const staticRoutes = [
