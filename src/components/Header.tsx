@@ -66,8 +66,8 @@ export default function Header() {
 
   return (
     <>
-      {/* Floating Capsule Glassic Header (CodeOrbit Luxury Pill Navbar) */}
-      <header className="sticky top-2 sm:top-3.5 z-40 w-full px-2 sm:px-4 pointer-events-none transition-all">
+      {/* Fixed Floating Capsule Glassic Header (Always Visible on Scroll) */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-full px-2 sm:px-4 pt-2 sm:pt-3 pointer-events-none transition-all">
         <div className="max-w-7xl mx-auto rounded-full glassic-header pointer-events-auto px-2.5 sm:px-5 py-1.5 sm:py-2 flex items-center justify-between border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] relative">
           
           {/* ======================================================= */}
@@ -125,30 +125,9 @@ export default function Header() {
           </nav>
 
           {/* ======================================================= */}
-          {/* RIGHT: Phone + WhatsApp + Wishlist + Cart + Profile     */}
+          {/* RIGHT: Wishlist + Cart + Profile Action Buttons         */}
           {/* ======================================================= */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end z-10">
-            
-            {/* Phone Number Pill (CodeOrbit Matching Style) */}
-            <a
-              href="tel:+919001725016"
-              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-[11px] font-mono text-neutral-300 transition-all"
-            >
-              <Phone className="w-3 h-3 text-neutral-400" />
-              <span>+91 90017 25016</span>
-            </a>
-
-            {/* Green WhatsApp Quote Pill (CodeOrbit Matching Style) */}
-            <a
-              href="https://wa.me/919001725016?text=Hello%20GOYAL%20COLLECTIONS%2C%20I%20would%20like%20to%20inquire%20about%20your%20luxury%20collection."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-[11px] font-bold transition-all shadow-md active:scale-95 shrink-0"
-              title="Chat on WhatsApp"
-            >
-              <MessageCircle className="w-3.5 h-3.5 fill-white text-white shrink-0" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
 
             {/* Wishlist Icon */}
             <Link

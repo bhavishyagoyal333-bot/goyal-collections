@@ -20,7 +20,7 @@ export default function StoreShell({ children }: { children: React.ReactNode }) 
     <>
       <RealtimeListener />
       <Header />
-      <main className="flex-1 w-full max-w-full overflow-x-hidden bg-black text-white">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden bg-black text-white pt-16 sm:pt-20">
         {children}
       </main>
       <BottomFloatingCart />
