@@ -8,9 +8,9 @@ interface MirliLogoProps {
   showTextOnMobile?: boolean;
 }
 
-export default function MirliLogo({ className = '', size = 'md', showTextOnMobile = false }: MirliLogoProps) {
+export default function MirliLogo({ className = '', size = 'md', showTextOnMobile = true }: MirliLogoProps) {
   return (
-    <div className={`flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
+    <div className={`flex items-center gap-2 sm:gap-3 select-none ${className}`}>
       {/* Precision Vector Monogram Crest: GC Interlocking Luxury Monogram */}
       <svg
         viewBox="0 0 44 44"
@@ -46,11 +46,11 @@ export default function MirliLogo({ className = '', size = 'md', showTextOnMobil
 
       {/* Typography: GOYAL COLLECTIONS Wordmark & Subtitle */}
       <div className={`${showTextOnMobile ? 'flex' : 'hidden sm:flex'} flex-col justify-center`}>
-        <span className="font-serif text-base sm:text-lg lg:text-xl font-extrabold tracking-[0.2em] sm:tracking-[0.24em] text-white leading-none group-hover:tracking-[0.26em] transition-all whitespace-nowrap">
+        <span className="font-serif text-xs sm:text-lg lg:text-xl font-extrabold tracking-[0.16em] sm:tracking-[0.24em] text-white leading-none group-hover:tracking-[0.26em] transition-all whitespace-nowrap">
           GOYAL COLLECTIONS
         </span>
-        <span className="text-[7px] sm:text-[8px] tracking-[0.38em] text-neutral-400 uppercase font-mono mt-0.5 font-semibold whitespace-nowrap">
-          HAUTE COUTURE
+        <span className="text-[6.5px] sm:text-[8px] tracking-[0.28em] sm:tracking-[0.38em] text-neutral-400 uppercase font-mono mt-0.5 font-semibold whitespace-nowrap">
+          HAUTE COUTURE // ATELIER
         </span>
       </div>
     </div>

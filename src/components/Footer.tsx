@@ -2,11 +2,16 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, RefreshCw, Truck, Award, CheckCircle } from 'lucide-react';
+import { ArrowRight, ShieldCheck, RefreshCw, Truck, Award, CheckCircle, ChevronDown } from 'lucide-react';
 
 export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+
+  const toggleSection = (sec: string) => {
+    setOpenSection((prev) => (prev === sec ? null : sec));
+  };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,12 +124,23 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Footwear Column */}
-          <div>
-            <h6 className="text-xs font-bold uppercase tracking-widest text-white mb-4">
-              1. Footwear
-            </h6>
-            <ul className="space-y-2 text-xs text-neutral-400">
+          {/* 1. Footwear Column */}
+          <div className="border-b border-neutral-800/80 md:border-b-0 pb-4 md:pb-0">
+            <button
+              type="button"
+              onClick={() => toggleSection('footwear')}
+              className="w-full flex items-center justify-between md:cursor-default text-left py-2 md:py-0"
+            >
+              <h6 className="text-xs font-bold uppercase tracking-widest text-white">
+                1. Footwear
+              </h6>
+              <ChevronDown
+                className={`w-4 h-4 text-neutral-400 md:hidden transition-transform duration-300 ${
+                  openSection === 'footwear' ? 'rotate-180 text-white' : ''
+                }`}
+              />
+            </button>
+            <ul className={`mt-3 space-y-2 text-xs text-neutral-400 ${openSection === 'footwear' ? 'block' : 'hidden md:block'}`}>
               <li>
                 <Link href="/category/footwear/mens-footwear" className="hover:text-white transition-colors">
                   Men&apos;s Footwear
@@ -158,12 +174,23 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Ready-made Clothes Column */}
-          <div>
-            <h6 className="text-xs font-bold uppercase tracking-widest text-white mb-4">
-              2. Ready-made Clothes
-            </h6>
-            <ul className="space-y-2 text-xs text-neutral-400">
+          {/* 2. Ready-made Clothes Column */}
+          <div className="border-b border-neutral-800/80 md:border-b-0 pb-4 md:pb-0">
+            <button
+              type="button"
+              onClick={() => toggleSection('ready-made')}
+              className="w-full flex items-center justify-between md:cursor-default text-left py-2 md:py-0"
+            >
+              <h6 className="text-xs font-bold uppercase tracking-widest text-white">
+                2. Ready-made Clothes
+              </h6>
+              <ChevronDown
+                className={`w-4 h-4 text-neutral-400 md:hidden transition-transform duration-300 ${
+                  openSection === 'ready-made' ? 'rotate-180 text-white' : ''
+                }`}
+              />
+            </button>
+            <ul className={`mt-3 space-y-2 text-xs text-neutral-400 ${openSection === 'ready-made' ? 'block' : 'hidden md:block'}`}>
               <li>
                 <Link href="/category/ready-made-clothes/mens-wear" className="hover:text-white transition-colors">
                   Men&apos;s Wear
@@ -197,12 +224,23 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Client Concierge & Legal */}
-          <div>
-            <h6 className="text-xs font-bold uppercase tracking-widest text-white mb-4">
-              Concierge &amp; Legal
-            </h6>
-            <ul className="space-y-2 text-xs text-neutral-400">
+          {/* 3. Concierge & Legal Column */}
+          <div className="border-b border-neutral-800/80 md:border-b-0 pb-4 md:pb-0">
+            <button
+              type="button"
+              onClick={() => toggleSection('concierge')}
+              className="w-full flex items-center justify-between md:cursor-default text-left py-2 md:py-0"
+            >
+              <h6 className="text-xs font-bold uppercase tracking-widest text-white">
+                3. Concierge &amp; Legal
+              </h6>
+              <ChevronDown
+                className={`w-4 h-4 text-neutral-400 md:hidden transition-transform duration-300 ${
+                  openSection === 'concierge' ? 'rotate-180 text-white' : ''
+                }`}
+              />
+            </button>
+            <ul className={`mt-3 space-y-2 text-xs text-neutral-400 ${openSection === 'concierge' ? 'block' : 'hidden md:block'}`}>
               <li>
                 <Link href="/order-tracking" className="hover:text-white transition-colors">
                   Order Tracking

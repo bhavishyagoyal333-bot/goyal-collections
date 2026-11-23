@@ -62,7 +62,7 @@ const SUBCATEGORIES_DATA = [
     parentTitle: 'Apparel Atelier',
     slug: 'womens-wear',
     index: '07',
-    img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400&auto=format&fit=crop',
+    img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=400&auto=format&fit=crop',
   },
   {
     name: "Kids' Wear",

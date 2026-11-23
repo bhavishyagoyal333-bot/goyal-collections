@@ -132,7 +132,7 @@ export default function HomePage() {
             subtitle="Minimalist trench coats, silk slip silhouettes & sculptural stiletto mules crafted for poise."
             ctaText="EXPLORE WOMEN'S COLLECTION"
             href="/category/ready-made-clothes/womens-wear"
-            imageUrl="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&auto=format&fit=crop"
+            imageUrl="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
           />
         </section>
 

@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   MapPin,
   AlertCircle,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -28,7 +29,12 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  const toggleAccordion = (cat: string) => {
+    setOpenAccordion((prev) => (prev === cat ? null : cat));
+  };
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -58,18 +64,18 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-neutral-950/95 backdrop-blur-md border-b border-neutral-800/80 transition-all">
+      <header className="sticky top-0 z-40 w-full bg-neutral-950/70 backdrop-blur-2xl border-b border-white/10 shadow-2xl transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
           
           {/* ======================================================= */}
           {/* LEFT: Three-Line Hamburger Menu + Brand Logo            */}
           {/* ======================================================= */}
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
-            {/* Three-Line Hamburger Menu Button */}
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+            {/* Three-Line Hamburger Menu Button with Glassic Look */}
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="group p-2 rounded-full border border-neutral-800 hover:border-neutral-500 bg-neutral-900/80 text-white flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-white"
+              className="group p-2 sm:p-2.5 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95 shadow-sm"
               aria-label="Open Navigation Menu"
             >
               <div className="w-4 h-3 flex flex-col justify-between">
@@ -79,9 +85,9 @@ export default function Header() {
               </div>
             </button>
 
-            {/* GOYAL COLLECTIONS Logo Asset with Proper Spacing */}
+            {/* GOYAL COLLECTIONS Logo Asset */}
             <Link href="/" className="group flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
-              <MirliLogo />
+              <MirliLogo showTextOnMobile={true} />
             </Link>
           </div>
 
@@ -105,7 +111,7 @@ export default function Header() {
             {/* Wishlist Icon (Desktop Only to keep Mobile Compact) */}
             <Link
               href="/wishlist"
-              className="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-neutral-800 hover:border-neutral-500 bg-neutral-900/80 items-center justify-center text-white transition-all relative group"
+              className="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md items-center justify-center text-white transition-all relative group shadow-sm active:scale-95"
               aria-label="Wishlist"
             >
               <Heart className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
@@ -116,10 +122,10 @@ export default function Header() {
               )}
             </Link>
 
-            {/* Shopping Bag / Cart Icon */}
+            {/* Shopping Bag / Cart Icon with Glassic Styling */}
             <Link
               href="/cart"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-neutral-800 hover:border-neutral-500 bg-neutral-900/80 flex items-center justify-center text-white transition-all relative group"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all relative group shadow-sm active:scale-95"
               aria-label="Shopping Bag"
             >
               <ShoppingBag className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
@@ -138,10 +144,10 @@ export default function Header() {
                   e.stopPropagation();
                   setIsProfileOpen((prev) => !prev);
                 }}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center text-white transition-all group ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center text-white transition-all group backdrop-blur-md shadow-sm active:scale-95 ${
                   user
-                    ? 'border-white bg-white/10'
-                    : 'border-neutral-800 hover:border-neutral-500 bg-neutral-900/80'
+                    ? 'border-white bg-white/20'
+                    : 'border-white/15 bg-white/10 hover:bg-white/20'
                 }`}
                 aria-expanded={isProfileOpen}
                 aria-label="User Profile"
@@ -321,94 +327,162 @@ export default function Header() {
             </div>
 
             {/* Drawer Content */}
-            <div className="p-5 sm:p-6 space-y-7 flex-1">
+            <div className="p-5 sm:p-6 space-y-4 flex-1">
               
-              {/* Category 1: Footwear */}
-              <div>
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-neutral-800">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-neutral-400 font-bold block">CATEGORY 01</span>
+              {/* Category 1: Footwear Accordion Dropdown */}
+              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('footwear')}
+                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-neutral-800/40 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <div>
+                      <span className="text-[9px] uppercase font-mono text-neutral-400 font-bold block">CATEGORY 01</span>
+                      <span className="font-serif text-base font-bold text-white tracking-wide">1. FOOTWEAR</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-neutral-400 px-2 py-0.5 rounded-full bg-neutral-800">5 Lines</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
+                        openAccordion === 'footwear' ? 'rotate-180 text-white' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {openAccordion === 'footwear' && (
+                  <div className="px-3.5 pb-3.5 pt-1 border-t border-neutral-800/60 animate-fade-in space-y-1">
+                    {[
+                      { name: "Men's Footwear", href: '/category/footwear/mens-footwear' },
+                      { name: "Women's Footwear", href: '/category/footwear/womens-footwear' },
+                      { name: "Kids' Footwear", href: '/category/footwear/kids-footwear' },
+                      { name: 'Shoes', href: '/category/footwear/shoes' },
+                      { name: 'Sandals & Slippers', href: '/category/footwear/sandals-slippers' },
+                    ].map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-neutral-800/70 text-neutral-300 hover:text-white text-xs font-mono transition-colors"
+                      >
+                        <span>{sub.name}</span>
+                        <span className="text-neutral-500">→</span>
+                      </Link>
+                    ))}
                     <Link
                       href="/category/footwear"
                       onClick={() => setIsMenuOpen(false)}
-                      className="font-serif text-lg font-bold text-white hover:text-neutral-300"
+                      className="block text-center py-2 mt-1 rounded-xl bg-neutral-800/60 hover:bg-white hover:text-black text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
                     >
-                      Footwear
+                      All Footwear &rarr;
                     </Link>
                   </div>
-                  <Link
-                    href="/category/footwear"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-xs font-mono font-semibold text-neutral-400 hover:text-white flex items-center gap-1"
-                  >
-                    <span>View All &rarr;</span>
-                  </Link>
-                </div>
+                )}
+              </div>
 
-                <ul className="space-y-1.5 text-xs font-mono">
-                  {[
-                    { name: "Men's Footwear", href: '/category/footwear/mens-footwear' },
-                    { name: "Women's Footwear", href: '/category/footwear/womens-footwear' },
-                    { name: "Kids' Footwear", href: '/category/footwear/kids-footwear' },
-                    { name: 'Shoes', href: '/category/footwear/shoes' },
-                    { name: 'Sandals & Slippers', href: '/category/footwear/sandals-slippers' },
-                  ].map((sub) => (
-                    <li key={sub.href}>
+              {/* Category 2: Ready-made Clothes Accordion Dropdown */}
+              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('ready-made')}
+                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-neutral-800/40 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <div>
+                      <span className="text-[9px] uppercase font-mono text-neutral-400 font-bold block">CATEGORY 02</span>
+                      <span className="font-serif text-base font-bold text-white tracking-wide">2. READY-MADE CLOTHES</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-neutral-400 px-2 py-0.5 rounded-full bg-neutral-800">5 Lines</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
+                        openAccordion === 'ready-made' ? 'rotate-180 text-white' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {openAccordion === 'ready-made' && (
+                  <div className="px-3.5 pb-3.5 pt-1 border-t border-neutral-800/60 animate-fade-in space-y-1">
+                    {[
+                      { name: "Men's Wear", href: '/category/ready-made-clothes/mens-wear' },
+                      { name: "Women's Wear", href: '/category/ready-made-clothes/womens-wear' },
+                      { name: "Kids' Wear", href: '/category/ready-made-clothes/kids-wear' },
+                      { name: "Boys' Wear", href: '/category/ready-made-clothes/boys-wear' },
+                      { name: "Girls' Wear", href: '/category/ready-made-clothes/girls-wear' },
+                    ].map((sub) => (
                       <Link
+                        key={sub.href}
                         href={sub.href}
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-neutral-900 text-neutral-300 hover:text-white transition-colors"
+                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-neutral-800/70 text-neutral-300 hover:text-white text-xs font-mono transition-colors"
                       >
                         <span>{sub.name}</span>
                         <span className="text-neutral-500">→</span>
                       </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Category 2: Ready-made Clothes */}
-              <div>
-                <div className="flex items-center justify-between pb-2 mb-3 border-b border-neutral-800">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-neutral-400 font-bold block">CATEGORY 02</span>
+                    ))}
                     <Link
                       href="/category/ready-made-clothes"
                       onClick={() => setIsMenuOpen(false)}
-                      className="font-serif text-lg font-bold text-white hover:text-neutral-300"
+                      className="block text-center py-2 mt-1 rounded-xl bg-neutral-800/60 hover:bg-white hover:text-black text-white text-xs font-mono font-bold uppercase tracking-wider transition-all"
                     >
-                      Ready-made Clothes
+                      All Ready-Made &rarr;
                     </Link>
                   </div>
-                  <Link
-                    href="/category/ready-made-clothes"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-xs font-mono font-semibold text-neutral-400 hover:text-white flex items-center gap-1"
-                  >
-                    <span>View All &rarr;</span>
-                  </Link>
-                </div>
+                )}
+              </div>
 
-                <ul className="space-y-1.5 text-xs font-mono">
-                  {[
-                    { name: "Men's Wear", href: '/category/ready-made-clothes/mens-wear' },
-                    { name: "Women's Wear", href: '/category/ready-made-clothes/womens-wear' },
-                    { name: "Kids' Wear", href: '/category/ready-made-clothes/kids-wear' },
-                    { name: "Boys' Wear", href: '/category/ready-made-clothes/boys-wear' },
-                    { name: "Girls' Wear", href: '/category/ready-made-clothes/girls-wear' },
-                  ].map((sub) => (
-                    <li key={sub.href}>
+              {/* Category 3: Concierge & Legal Accordion Dropdown */}
+              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('concierge')}
+                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-neutral-800/40 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <div>
+                      <span className="text-[9px] uppercase font-mono text-neutral-400 font-bold block">ASSISTANCE</span>
+                      <span className="font-serif text-base font-bold text-white tracking-wide">3. CONCIERGE &amp; LEGAL</span>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
+                      openAccordion === 'concierge' ? 'rotate-180 text-white' : ''
+                    }`}
+                  />
+                </button>
+
+                {openAccordion === 'concierge' && (
+                  <div className="px-3.5 pb-3.5 pt-1 border-t border-neutral-800/60 animate-fade-in space-y-1">
+                    {[
+                      { name: 'Order Tracking', href: '/order-tracking' },
+                      { name: 'My Account & Orders', href: '/account' },
+                      { name: 'About GOYAL COLLECTIONS', href: '/about' },
+                      { name: 'Contact & Support', href: '/contact' },
+                      { name: 'Frequently Asked Questions', href: '/faq' },
+                      { name: 'Shipping Policy', href: '/shipping-policy' },
+                      { name: 'Return & Refund Policy', href: '/return-policy' },
+                      { name: 'Privacy Policy', href: '/privacy-policy' },
+                      { name: 'Terms & Conditions', href: '/terms' },
+                    ].map((item) => (
                       <Link
-                        href={sub.href}
+                        key={item.href}
+                        href={item.href}
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-neutral-900 text-neutral-300 hover:text-white transition-colors"
+                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-neutral-800/70 text-neutral-300 hover:text-white text-xs font-mono transition-colors"
                       >
-                        <span>{sub.name}</span>
+                        <span>{item.name}</span>
                         <span className="text-neutral-500">→</span>
                       </Link>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons in Drawer */}

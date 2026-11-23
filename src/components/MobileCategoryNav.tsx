@@ -50,7 +50,7 @@ const MOBILE_CATEGORIES = [
     name: "Women's Wear",
     shortName: "Women's Wear",
     href: '/category/ready-made-clothes/womens-wear',
-    image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=300&auto=format&fit=crop',
     tag: '07',
   },
   {
