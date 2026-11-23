@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getProducts } from '@/lib/db';
 import { INITIAL_PRODUCTS } from '@/lib/initialData';
 
-export const revalidate = 3600; // Cache for 1 hour
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -77,7 +78,7 @@ ${itemsXml}
     return new NextResponse(xml, {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        'Cache-Control': 'no-store, must-revalidate',
       },
     });
   } catch (error: any) {

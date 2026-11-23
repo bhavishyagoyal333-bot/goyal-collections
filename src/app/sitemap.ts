@@ -1,10 +1,24 @@
 import { MetadataRoute } from 'next';
 import { getProducts } from '@/lib/db';
-import { CATEGORIES } from '@/lib/initialData';
+import { CATEGORIES, INITIAL_PRODUCTS } from '@/lib/initialData';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.goyalcollections.shop';
-  const { products } = getProducts();
+
+  let products = [];
+  try {
+    const res = getProducts({ includeInactive: false });
+    products = res.products;
+  } catch {
+    products = INITIAL_PRODUCTS;
+  }
+
+  if (!products || products.length === 0) {
+    products = INITIAL_PRODUCTS;
+  }
 
   const staticRoutes = [
     '',
@@ -44,12 +58,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ]);
 
-  const productRoutes = products.map((prod) => ({
-    url: `${baseUrl}/product/${prod.slug}`,
-    lastModified: new Date(prod.createdAt),
-    changeFrequency: 'daily' as const,
-    priority: 0.7,
-  }));
+  const productRoutes = products
+    .filter((prod) => (prod.status || 'active') === 'active')
+    .map((prod) => ({
+      url: `${baseUrl}/product/${prod.slug}`,
+      lastModified: prod.createdAt ? new Date(prod.createdAt) : new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
+    }));
 
   return [...staticRoutes, ...categoryRoutes, ...productRoutes];
 }
