@@ -9,11 +9,12 @@ interface ActivityLogsViewProps {
   onRefresh: () => void;
 }
 
-export default function ActivityLogsView({ logs, onRefresh }: ActivityLogsViewProps) {
+export default function ActivityLogsView({ logs = [], onRefresh }: ActivityLogsViewProps) {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  const filtered = logs.filter((log) => {
+  const safeLogs = logs || [];
+  const filtered = safeLogs.filter((log) => {
     const matchesSearch =
       log.action.toLowerCase().includes(search.toLowerCase()) ||
       log.details.toLowerCase().includes(search.toLowerCase()) ||

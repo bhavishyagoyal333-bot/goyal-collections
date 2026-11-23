@@ -20,15 +20,28 @@ import {
 import { emitRealtimeEvent } from './events';
 
 function getWritableDBPath(): string {
-  if (process.env.VERCEL || process.cwd().startsWith('/var/task')) {
+  // In serverless / AWS Lambda / Vercel or any production deployment, always use /tmp
+  if (
+    process.env.VERCEL ||
+    process.env.VERCEL_ENV ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.LAMBDA_TASK_ROOT ||
+    process.cwd().startsWith('/var/task') ||
+    process.cwd().includes('/tmp') ||
+    process.env.NODE_ENV === 'production'
+  ) {
     return path.join('/tmp', 'database.json');
   }
+
   try {
     const localDir = path.join(process.cwd(), 'data');
     if (!fs.existsSync(localDir)) {
       fs.mkdirSync(localDir, { recursive: true });
     }
-    fs.accessSync(localDir, fs.constants.W_OK);
+    // Perform an actual write test to guarantee directory is truly writable
+    const testFile = path.join(localDir, `.write_test_${Date.now()}`);
+    fs.writeFileSync(testFile, '1');
+    fs.unlinkSync(testFile);
     return path.join(localDir, 'database.json');
   } catch {
     return path.join('/tmp', 'database.json');
@@ -420,8 +433,8 @@ export function initDB(): DatabaseSchema {
           id: 'act-init-1',
           action: 'System Initialized',
           category: 'Auth',
-          details: 'MIRLI Command Atelier security protocol activated.',
-          adminEmail: 'admin@mirli.store',
+          details: 'GOYAL COLLECTIONS Admin Command Center security protocol activated.',
+          adminEmail: 'admin@goyalcollections.com',
           timestamp: '2026-11-10T10:00:00.000Z',
         },
       ],
@@ -600,14 +613,22 @@ export function saveDB(data: DatabaseSchema): void {
     const writablePath = getWritableDBPath();
     const targetDir = path.dirname(writablePath);
     if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+      try {
+        fs.mkdirSync(targetDir, { recursive: true });
+      } catch {}
     }
     const tempFile = `${writablePath}.tmp.${Date.now()}`;
     fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
     fs.renameSync(tempFile, writablePath);
     lastDiskMtime = Date.now();
   } catch (err: any) {
-    console.warn('Filesystem save notice (active memory state):', err.message);
+    try {
+      const writablePath = getWritableDBPath();
+      fs.writeFileSync(writablePath, JSON.stringify(data, null, 2), 'utf-8');
+      lastDiskMtime = Date.now();
+    } catch (directErr: any) {
+      console.warn('Filesystem save notice (active memory state):', directErr.message);
+    }
   }
 }
 
@@ -1115,8 +1136,8 @@ export function createOrder(data: {
   const db = initDB();
   const now = new Date();
   const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-  const orderId = `mirli-ord-${Date.now()}`;
-  const orderNumber = `MIRLI-${randomSuffix}`;
+  const orderId = `gc-ord-${Date.now()}`;
+  const orderNumber = `GC-${randomSuffix}`;
 
   const estDate = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
   const estimatedDeliveryDate = estDate.toLocaleDateString('en-IN', {
@@ -1130,8 +1151,8 @@ export function createOrder(data: {
       status: 'Order Placed',
       date: now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
       time: now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-      location: 'MIRLI Atelier, New Delhi',
-      description: 'Your bespoke order has been recorded in our concierge queue.',
+      location: 'GOYAL COLLECTIONS Atelier, New Delhi',
+      description: 'Your order has been recorded in our fulfillment queue.',
       completed: true,
       current: true,
     },
@@ -1139,7 +1160,7 @@ export function createOrder(data: {
       status: 'Confirmed',
       date: 'Estimated within 2 hours',
       time: '--:--',
-      location: 'MIRLI Atelier',
+      location: 'GOYAL COLLECTIONS Atelier',
       description: 'Payment authorized and order confirmed by fulfillment team.',
       completed: false,
       current: false,

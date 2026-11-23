@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     authenticated: true,
     user: {
-      email: auth.email || 'admin@mirli.store',
+      email: auth.email || 'admin@goyalcollections.com',
       role: 'super_admin',
-      name: 'Executive Atelier Admin',
+      name: 'Executive Goyal Collections Admin',
     },
   });
 }
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const identifier = body.identifier || body.email;
-    const password = body.password;
+    const identifier = (body.identifier || body.email || '').trim();
+    const password = (body.password || '').trim();
 
     if (!identifier || !password) {
       return NextResponse.json(
@@ -38,17 +38,21 @@ export async function POST(request: NextRequest) {
 
     const isValid = validateCredentials(identifier, password);
     if (!isValid) {
-      logAdminActivity('Failed Admin Login Attempt', 'Auth', `Invalid credentials for "${identifier}"`, identifier);
+      try {
+        logAdminActivity('Failed Admin Login Attempt', 'Auth', `Invalid credentials for "${identifier}"`, identifier);
+      } catch {}
       return NextResponse.json(
         { success: false, message: 'Invalid admin credentials. Access denied.' },
         { status: 401 }
       );
     }
 
-    const email = identifier.includes('@') ? identifier : 'admin@mirli.store';
+    const email = identifier.includes('@') ? identifier : 'admin@goyalcollections.com';
     const token = createAdminToken(email);
 
-    logAdminActivity('Admin Logged In', 'Auth', `Admin session authenticated for ${email}`, email);
+    try {
+      logAdminActivity('Admin Logged In', 'Auth', `Admin session authenticated for ${email}`, email);
+    } catch {}
 
     const response = NextResponse.json({
       success: true,
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
       user: {
         email,
         role: 'super_admin',
-        name: 'Executive Atelier Admin',
+        name: 'Executive Goyal Collections Admin',
       },
       token,
     });
@@ -74,14 +78,19 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error?.message || 'Authentication error occurred.' },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(request: NextRequest) {
   const auth = checkAdminAuth(request);
   if (auth.authorized) {
-    logAdminActivity('Admin Logged Out', 'Auth', `Admin logged out`, auth.email || 'admin@mirli.store');
+    try {
+      logAdminActivity('Admin Logged Out', 'Auth', `Admin logged out`, auth.email || 'admin@goyalcollections.com');
+    } catch {}
   }
 
   const response = NextResponse.json({ success: true, message: 'Logged out successfully.' });

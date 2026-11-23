@@ -61,7 +61,7 @@ export async function GET(
     const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'MIRLI-Luxury-Ecommerce/1.0',
+        'User-Agent': 'GOYAL-COLLECTIONS-Luxury-Ecommerce/1.0',
       },
     });
     clearTimeout(timeoutId);

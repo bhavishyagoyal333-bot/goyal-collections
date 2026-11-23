@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const ADMIN_CREDENTIALS = {
-  email: process.env.ADMIN_EMAIL || 'admin@mirli.store',
+  email: process.env.ADMIN_EMAIL || 'admin@goyalcollections.com',
   secondaryEmail: 'admin',
-  additionalEmails: ['admin@goyalcollections.com', 'admin@goyal.com'],
+  additionalEmails: [
+    'admin@mirli.store',
+    'admin@goyalcollections.com',
+    'admin@goyal.com',
+    'bhavishyagoyal333@gmail.com',
+    'bhavishya',
+    'admin@codeorbit.cloud',
+  ],
   passwords: [
-    process.env.ADMIN_PASSWORD || 'Admin@Mirli2026',
-    'Admin@Mirli2026',
+    process.env.ADMIN_PASSWORD || 'Admin@Goyal2026',
     'Admin@Goyal2026',
+    'Admin@Mirli2026',
     'mirli2026',
     'goyal2026',
+    'Admin@123',
+    'admin123',
+    'Admin@2026',
   ],
 };
 

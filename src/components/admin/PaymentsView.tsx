@@ -10,7 +10,7 @@ interface PaymentsViewProps {
   showToast: (msg: string) => void;
 }
 
-export default function PaymentsView({ payments, onRefresh, showToast }: PaymentsViewProps) {
+export default function PaymentsView({ payments = [], onRefresh, showToast }: PaymentsViewProps) {
   const [search, setSearch] = useState('');
   const [gatewayFilter, setGatewayFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -19,13 +19,14 @@ export default function PaymentsView({ payments, onRefresh, showToast }: Payment
   const [refundReason, setRefundReason] = useState('Customer return / order cancelled');
   const [isRefunding, setIsRefunding] = useState(false);
 
+  const safePayments = payments || [];
   // Compute metrics
-  const totalVolume = payments.reduce((sum, p) => (p.status === 'Paid' ? sum + p.amount : sum), 0);
-  const totalRefunded = payments.reduce((sum, p) => (p.refundAmount ? sum + p.refundAmount : 0), 0);
-  const successfulCount = payments.filter((p) => p.status === 'Paid').length;
-  const pendingCodCount = payments.filter((p) => p.status === 'Pending' || p.paymentMethod === 'Cash on Delivery').length;
+  const totalVolume = safePayments.reduce((sum, p) => (p.status === 'Paid' ? sum + p.amount : sum), 0);
+  const totalRefunded = safePayments.reduce((sum, p) => (p.refundAmount ? sum + p.refundAmount : 0), 0);
+  const successfulCount = safePayments.filter((p) => p.status === 'Paid').length;
+  const pendingCodCount = safePayments.filter((p) => p.status === 'Pending' || p.paymentMethod === 'Cash on Delivery').length;
 
-  const filtered = payments.filter((p) => {
+  const filtered = safePayments.filter((p) => {
     const matchesSearch =
       p.transactionId.toLowerCase().includes(search.toLowerCase()) ||
       p.orderNumber.toLowerCase().includes(search.toLowerCase()) ||

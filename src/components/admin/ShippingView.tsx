@@ -10,7 +10,7 @@ interface ShippingViewProps {
   showToast: (msg: string) => void;
 }
 
-export default function ShippingView({ shippingRecords, onRefresh, showToast }: ShippingViewProps) {
+export default function ShippingView({ shippingRecords = [], onRefresh, showToast }: ShippingViewProps) {
   const [search, setSearch] = useState('');
   const [courierFilter, setCourierFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -22,13 +22,14 @@ export default function ShippingView({ shippingRecords, onRefresh, showToast }: 
   const [editStatus, setEditStatus] = useState<ShippingRecord['status']>('In Transit');
   const [saving, setSaving] = useState(false);
 
+  const safeRecords = shippingRecords || [];
   // Compute metrics
-  const totalShipments = shippingRecords.length;
-  const inTransitCount = shippingRecords.filter((s) => s.status === 'In Transit' || s.status === 'Picked Up').length;
-  const outForDeliveryCount = shippingRecords.filter((s) => s.status === 'Out for Delivery').length;
-  const deliveredCount = shippingRecords.filter((s) => s.status === 'Delivered').length;
+  const totalShipments = safeRecords.length;
+  const inTransitCount = safeRecords.filter((s) => s.status === 'In Transit' || s.status === 'Picked Up').length;
+  const outForDeliveryCount = safeRecords.filter((s) => s.status === 'Out for Delivery').length;
+  const deliveredCount = safeRecords.filter((s) => s.status === 'Delivered').length;
 
-  const filtered = shippingRecords.filter((s) => {
+  const filtered = safeRecords.filter((s) => {
     const matchesSearch =
       s.trackingNumber.toLowerCase().includes(search.toLowerCase()) ||
       s.orderNumber.toLowerCase().includes(search.toLowerCase()) ||

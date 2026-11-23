@@ -28,7 +28,7 @@ interface NotificationsViewProps {
 }
 
 export default function NotificationsView({
-  notifications,
+  notifications = [],
   soundEnabled,
   onToggleSound,
   onPlayTestChime,
@@ -38,9 +38,10 @@ export default function NotificationsView({
   const [filter, setFilter] = useState<'all' | 'unread' | 'order' | 'stock' | 'system'>('all');
   const [actionLoading, setActionLoading] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const safeNotifications = notifications || [];
+  const unreadCount = safeNotifications.filter((n) => !n.read).length;
 
-  const filtered = notifications.filter((n) => {
+  const filtered = safeNotifications.filter((n) => {
     if (filter === 'unread') return !n.read;
     if (filter === 'order') return n.type === 'order';
     if (filter === 'stock') return n.type === 'stock';

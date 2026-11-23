@@ -323,7 +323,7 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setIsAuthenticated(true);
-        showToast('Authorized. Welcome to MIRLI Command Atelier.');
+        showToast('Authorized. Welcome to GOYAL COLLECTIONS Admin Command Center.');
         loadAllData();
       } else {
         setLoginError(data.message || 'Invalid credentials. Access denied.');
@@ -366,41 +366,43 @@ export default function AdminDashboardPage() {
         notifRes,
         usersRes,
       ] = await Promise.all([
-        fetch('/api/admin/stats').then((r) => r.json()),
-        fetch('/api/admin/products').then((r) => r.json()),
-        fetch('/api/admin/categories').then((r) => r.json()),
-        fetch('/api/admin/orders').then((r) => r.json()),
-        fetch('/api/admin/customers').then((r) => r.json()),
-        fetch('/api/admin/inventory').then((r) => r.json()),
-        fetch('/api/admin/reviews').then((r) => r.json()),
-        fetch('/api/admin/coupons').then((r) => r.json()),
-        fetch('/api/admin/banners').then((r) => r.json()),
-        fetch('/api/admin/logs').then((r) => r.json()),
-        fetch('/api/admin/settings').then((r) => r.json()),
+        fetch('/api/admin/stats').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/products').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/categories').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/orders').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/customers').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/inventory').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/reviews').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/coupons').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/banners').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/logs').then((r) => r.json()).catch(() => ({ success: false })),
+        fetch('/api/admin/settings').then((r) => r.json()).catch(() => ({ success: false })),
         fetch('/api/admin/payments').then((r) => r.json()).catch(() => ({ success: false })),
         fetch('/api/admin/shipping').then((r) => r.json()).catch(() => ({ success: false })),
         fetch('/api/admin/notifications').then((r) => r.json()).catch(() => ({ success: false })),
         fetch('/api/admin/users').then((r) => r.json()).catch(() => ({ success: false })),
       ]);
 
-      if (statsRes.success) setStats(statsRes.stats);
-      if (prodRes.success) setProducts(prodRes.products);
-      if (catRes.success) setCategories(catRes.categories);
-      if (ordRes.success) setOrders(ordRes.orders);
-      if (custRes.success) setCustomers(custRes.customers);
-      if (invRes.success) setInventoryLogs(invRes.logs);
-      if (revRes.success) setReviews(revRes.reviews);
-      if (coupRes.success) setCoupons(coupRes.coupons);
-      if (banRes.success) setBanners(banRes.slides);
-      if (logRes.success) setActivityLogs(logRes.logs);
-      if (setRes.success) setSettings(setRes.settings);
-      if (paymentsRes?.success) setPayments(paymentsRes.payments);
-      if (shippingRes?.success) setShippingRecords(shippingRes.shipping);
-      if (notifRes?.success) {
+      if (statsRes?.success) setStats(statsRes.stats);
+      if (prodRes?.success) setProducts(prodRes.products || []);
+      if (catRes?.success) setCategories(catRes.categories || []);
+      if (ordRes?.success) setOrders(ordRes.orders || []);
+      if (custRes?.success) setCustomers(custRes.customers || []);
+      if (invRes?.success) setInventoryLogs(invRes.logs || []);
+      if (revRes?.success) setReviews(revRes.reviews || []);
+      if (coupRes?.success) setCoupons(coupRes.coupons || []);
+      if (banRes?.success) setBanners(banRes.slides || []);
+      if (logRes?.success) setActivityLogs(logRes.logs || []);
+      if (setRes?.success) setSettings(setRes.settings || null);
+      if (paymentsRes?.success) setPayments(paymentsRes.payments || []);
+      if (shippingRes?.success) setShippingRecords(shippingRes.shipping || []);
+      if (notifRes?.success && notifRes.notifications) {
         setNotifications(notifRes.notifications);
-        setUnreadNotificationsCount(notifRes.unreadCount ?? notifRes.notifications.filter((n) => !n.read).length);
+        setUnreadNotificationsCount(
+          notifRes.unreadCount ?? (notifRes.notifications?.filter((n: any) => !n.read)?.length || 0)
+        );
       }
-      if (usersRes?.success) setAdminUsers(usersRes.users);
+      if (usersRes?.success) setAdminUsers(usersRes.users || []);
     } catch (err) {
       console.error('Failed loading admin records:', err);
     } finally {
@@ -1221,7 +1223,7 @@ export default function AdminDashboardPage() {
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
     return {
-      ...stats,
+      ...(stats || {}),
       totalRevenue: rev,
       totalOrders: matchingOrders.length,
       pendingOrders: matchingOrders.filter((o) => o.orderStatus === 'Order Placed' || o.orderStatus === 'Confirmed').length,
@@ -1231,6 +1233,24 @@ export default function AdminDashboardPage() {
     };
   }, [stats, orders, dateFilter]);
 
+  const safeStats = useMemo(() => {
+    const s = filteredStats || stats;
+    return {
+      totalRevenue: s?.totalRevenue ?? 0,
+      totalOrders: s?.totalOrders ?? 0,
+      totalCustomers: s?.totalCustomers ?? 0,
+      totalProducts: s?.totalProducts ?? 0,
+      pendingOrders: s?.pendingOrders ?? 0,
+      processingOrders: s?.processingOrders ?? 0,
+      deliveredOrders: s?.deliveredOrders ?? 0,
+      cancelledOrders: s?.cancelledOrders ?? 0,
+      ordersByStatus: s?.ordersByStatus ?? {},
+      bestSellingProducts: s?.bestSellingProducts ?? [],
+      lowStockProducts: s?.lowStockProducts ?? [],
+      paymentMethodStats: s?.paymentMethodStats ?? { ONLINE: 0, COD: 0 },
+    };
+  }, [filteredStats, stats]);
+
   // If loading session check
   if (loading && isAuthenticated === null) {
     return (
@@ -1238,7 +1258,7 @@ export default function AdminDashboardPage() {
         <div className="text-center space-y-4">
           <div className="w-12 h-12 rounded-full border-2 border-white border-t-transparent animate-spin mx-auto" />
           <p className="text-xs uppercase tracking-widest text-neutral-400">
-            Validating MIRLI Atelier Access Protocol...
+            Validating GOYAL COLLECTIONS Admin Access Protocol...
           </p>
         </div>
       </div>
@@ -1254,14 +1274,14 @@ export default function AdminDashboardPage() {
         <div className="w-full max-w-md rounded-3xl bg-neutral-950 border border-neutral-800 p-8 sm:p-10 shadow-2xl space-y-6">
           <div className="text-center space-y-3">
             <div className="w-16 h-16 rounded-full bg-white text-black font-serif font-black text-2xl flex items-center justify-center mx-auto shadow-circular-glow">
-              M
+              GC
             </div>
             <div>
               <h1 className="font-serif text-2xl font-black tracking-wide">
-                MIRLI COMMAND ATELIER
+                GOYAL COLLECTIONS
               </h1>
               <span className="inline-block mt-1 text-[10px] uppercase font-mono tracking-widest text-amber-400 border border-amber-400/30 px-2.5 py-0.5 rounded-full">
-                Restricted Executive Access
+                ADMIN COMMAND CENTER
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-light">
@@ -1286,7 +1306,7 @@ export default function AdminDashboardPage() {
                 required
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="admin@mirli.store"
+                placeholder="admin@goyalcollections.com"
                 className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3 text-white placeholder-neutral-600 focus:outline-none focus:border-white transition-colors"
               />
             </div>
@@ -1325,8 +1345,8 @@ export default function AdminDashboardPage() {
           </form>
 
           <div className="pt-4 border-t border-neutral-900 text-center">
-            <span className="text-[10px] text-neutral-600 font-mono block">
-              Default Atelier Credentials: admin@mirli.store // Admin@Mirli2026 or Admin@Goyal2026
+            <span className="text-[10px] text-neutral-400 font-mono block">
+              Default Credentials: admin@goyalcollections.com // Admin@Goyal2026
             </span>
           </div>
         </div>
@@ -1392,15 +1412,15 @@ export default function AdminDashboardPage() {
           {/* Logo & Super Admin Header */}
           <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white text-black font-serif font-black text-lg flex items-center justify-center shrink-0 shadow-sm">
-                M
+              <div className="w-10 h-10 rounded-full bg-white text-black font-serif font-black text-sm flex items-center justify-center shrink-0 shadow-sm">
+                GC
               </div>
               <div>
                 <span className="font-serif font-black text-base tracking-wider block">
-                  MIRLI
+                  GOYAL
                 </span>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 block">
-                  COMMAND ATELIER
+                  COLLECTIONS
                 </span>
               </div>
             </div>
@@ -1608,7 +1628,7 @@ export default function AdminDashboardPage() {
                 <div className="p-5 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">TOTAL REVENUE</span>
                   <div className="font-mono text-xl sm:text-2xl font-black text-white">
-                    ₹{(filteredStats || stats).totalRevenue.toLocaleString('en-IN')}
+                    ₹{safeStats.totalRevenue.toLocaleString('en-IN')}
                   </div>
                   <span className="text-[11px] text-emerald-400 font-mono">Net confirmed earnings</span>
                 </div>
@@ -1616,7 +1636,7 @@ export default function AdminDashboardPage() {
                 <div className="p-5 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">TOTAL ORDERS</span>
                   <div className="font-mono text-xl sm:text-2xl font-black text-white">
-                    {(filteredStats || stats).totalOrders}
+                    {safeStats.totalOrders}
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">Across all time</span>
                 </div>
@@ -1624,7 +1644,7 @@ export default function AdminDashboardPage() {
                 <div className="p-5 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">TOTAL CUSTOMERS</span>
                   <div className="font-mono text-xl sm:text-2xl font-black text-white">
-                    {stats.totalCustomers}
+                    {safeStats.totalCustomers}
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">Patron profiles</span>
                 </div>
@@ -1632,7 +1652,7 @@ export default function AdminDashboardPage() {
                 <div className="p-5 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">TOTAL PRODUCTS</span>
                   <div className="font-mono text-xl sm:text-2xl font-black text-white">
-                    {stats.totalProducts}
+                    {safeStats.totalProducts}
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">Active catalog items</span>
                 </div>
@@ -1640,22 +1660,22 @@ export default function AdminDashboardPage() {
                 {/* 4 Status-Specific KPI Cards */}
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800/80 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-amber-400 block">PENDING ORDERS</span>
-                  <div className="font-mono text-lg font-bold text-white">{(filteredStats || stats).pendingOrders}</div>
+                  <div className="font-mono text-lg font-bold text-white">{safeStats.pendingOrders}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800/80 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-sky-400 block">PROCESSING / PACKED</span>
-                  <div className="font-mono text-lg font-bold text-white">{(filteredStats || stats).processingOrders}</div>
+                  <div className="font-mono text-lg font-bold text-white">{safeStats.processingOrders}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800/80 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-emerald-400 block">DELIVERED ORDERS</span>
-                  <div className="font-mono text-lg font-bold text-white">{(filteredStats || stats).deliveredOrders}</div>
+                  <div className="font-mono text-lg font-bold text-white">{safeStats.deliveredOrders}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800/80 space-y-1">
                   <span className="text-[10px] uppercase font-mono text-red-400 block">CANCELLED / REFUNDED</span>
-                  <div className="font-mono text-lg font-bold text-white">{(filteredStats || stats).cancelledOrders}</div>
+                  <div className="font-mono text-lg font-bold text-white">{safeStats.cancelledOrders}</div>
                 </div>
               </div>
 
@@ -1684,7 +1704,7 @@ export default function AdminDashboardPage() {
                     <div key={st} className="p-3 rounded-2xl bg-neutral-950 border border-neutral-800/60">
                       <span className="text-[10px] text-neutral-400 truncate block">{st}</span>
                       <span className="text-base font-bold text-white mt-0.5 block">
-                        {stats.ordersByStatus[st] || 0}
+                        {safeStats.ordersByStatus?.[st] || 0}
                       </span>
                     </div>
                   ))}
@@ -1701,8 +1721,8 @@ export default function AdminDashboardPage() {
                     <span className="text-[10px] font-mono text-neutral-400">By units sold</span>
                   </div>
                   <div className="space-y-3">
-                    {stats.bestSellingProducts && stats.bestSellingProducts.length > 0 ? (
-                      stats.bestSellingProducts.map((item: any, idx: number) => (
+                    {safeStats.bestSellingProducts && safeStats.bestSellingProducts.length > 0 ? (
+                      safeStats.bestSellingProducts.map((item: any, idx: number) => (
                         <div key={idx} className="flex items-center justify-between gap-3 text-xs">
                           <div className="flex items-center gap-3">
                             <img
@@ -1740,8 +1760,8 @@ export default function AdminDashboardPage() {
                     </button>
                   </div>
                   <div className="space-y-3">
-                    {stats.lowStockProducts && stats.lowStockProducts.length > 0 ? (
-                      stats.lowStockProducts.map((p: Product) => (
+                    {safeStats.lowStockProducts && safeStats.lowStockProducts.length > 0 ? (
+                      safeStats.lowStockProducts.map((p: Product) => (
                         <div key={p.id} className="flex items-center justify-between gap-3 text-xs">
                           <div className="flex items-center gap-3">
                             <img
@@ -2047,7 +2067,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
                 <div>
                   <h3 className="font-serif text-xl font-bold">CATEGORY ARCHITECTURE ({categories.length})</h3>
-                  <p className="text-xs text-neutral-400">Preserving MIRLI luxury hierarchy: Footwear &amp; Ready-made Clothes.</p>
+                  <p className="text-xs text-neutral-400">Preserving GOYAL COLLECTIONS luxury hierarchy: Footwear &amp; Ready-made Clothes.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -2745,7 +2765,7 @@ export default function AdminDashboardPage() {
           {/* ========================================================= */}
           {/* TAB 10: REPORTS & ANALYTICS                               */}
           {/* ========================================================= */}
-          {activeTab === 'analytics' && stats && (
+          {activeTab === 'analytics' && (
             <div className="space-y-8 animate-fade-in">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-800">
                 <div>
@@ -2766,7 +2786,7 @@ export default function AdminDashboardPage() {
                 <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-2">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">AVERAGE ORDER VALUE (AOV)</span>
                   <div className="font-mono text-2xl font-bold text-white">
-                    ₹{stats.totalOrders > 0 ? Math.round(stats.totalRevenue / stats.totalOrders).toLocaleString('en-IN') : 0}
+                    ₹{safeStats.totalOrders > 0 ? Math.round(safeStats.totalRevenue / safeStats.totalOrders).toLocaleString('en-IN') : 0}
                   </div>
                   <span className="text-xs text-neutral-400">Calculated across verified orders</span>
                 </div>
@@ -2774,7 +2794,7 @@ export default function AdminDashboardPage() {
                 <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-2">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">ONLINE PREPAID ORDERS</span>
                   <div className="font-mono text-2xl font-bold text-white">
-                    {stats.paymentMethodStats?.ONLINE || 0}
+                    {safeStats.paymentMethodStats?.ONLINE || 0}
                   </div>
                   <span className="text-xs text-emerald-400">Instant digital checkout</span>
                 </div>
@@ -2782,7 +2802,7 @@ export default function AdminDashboardPage() {
                 <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 space-y-2">
                   <span className="text-[10px] uppercase font-mono text-neutral-400 block">CASH ON DELIVERY (COD)</span>
                   <div className="font-mono text-2xl font-bold text-white">
-                    {stats.paymentMethodStats?.COD || 0}
+                    {safeStats.paymentMethodStats?.COD || 0}
                   </div>
                   <span className="text-xs text-amber-400">Pay on doorstep</span>
                 </div>
@@ -3623,7 +3643,7 @@ export default function AdminDashboardPage() {
                   type="text"
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
-                  placeholder="e.g. MIRLI-AIR-89218"
+                  placeholder="e.g. GC-AIR-89218"
                   className="w-full px-3 py-2 rounded-xl bg-neutral-950 border border-neutral-800 text-white"
                 />
               </div>

@@ -10,7 +10,7 @@ interface UsersViewProps {
   showToast: (msg: string) => void;
 }
 
-export default function UsersView({ adminUsers, onRefresh, showToast }: UsersViewProps) {
+export default function UsersView({ adminUsers = [], onRefresh, showToast }: UsersViewProps) {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -22,11 +22,12 @@ export default function UsersView({ adminUsers, onRefresh, showToast }: UsersVie
   const [status, setStatus] = useState<AdminUser['status']>('active');
   const [saving, setSaving] = useState(false);
 
-  const filtered = adminUsers.filter(
+  const safeUsers = adminUsers || [];
+  const filtered = safeUsers.filter(
     (u) =>
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      u.roleTitle.toLowerCase().includes(search.toLowerCase())
+      u.name?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase()) ||
+      u.roleTitle?.toLowerCase().includes(search.toLowerCase())
   );
 
   const openNewUserModal = () => {
