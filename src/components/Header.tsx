@@ -64,18 +64,18 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-neutral-950/70 backdrop-blur-2xl border-b border-white/10 shadow-2xl transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 w-full glassic-header transition-all">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between relative">
           
           {/* ======================================================= */}
-          {/* LEFT: Three-Line Hamburger Menu + Brand Logo            */}
+          {/* LEFT: Three-Line Hamburger Menu (+ Desktop Brand Logo)  */}
           {/* ======================================================= */}
-          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0 z-10">
             {/* Three-Line Hamburger Menu Button with Glassic Look */}
             <button
               type="button"
               onClick={() => setIsMenuOpen(true)}
-              className="group p-2 sm:p-2.5 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all focus:outline-none focus:ring-1 focus:ring-white active:scale-95 shadow-sm"
+              className="glassic-btn p-2 sm:p-2.5 rounded-full text-white flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-white/40 active:scale-95 shadow-sm"
               aria-label="Open Navigation Menu"
             >
               <div className="w-4 h-3 flex flex-col justify-between">
@@ -85,14 +85,23 @@ export default function Header() {
               </div>
             </button>
 
-            {/* GOYAL COLLECTIONS Logo Asset */}
-            <Link href="/" className="group flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
+            {/* Desktop Brand Logo (Shown on md+ screens) */}
+            <Link href="/" className="hidden md:flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
+              <MirliLogo />
+            </Link>
+          </div>
+
+          {/* ======================================================= */}
+          {/* CENTER ON MOBILE: Symmetrically Centered Brand Logo     */}
+          {/* ======================================================= */}
+          <div className="md:hidden absolute inset-x-0 mx-auto flex items-center justify-center pointer-events-none z-0 px-12">
+            <Link href="/" className="pointer-events-auto flex items-center" aria-label="GOYAL COLLECTIONS Homepage">
               <MirliLogo showTextOnMobile={true} />
             </Link>
           </div>
 
           {/* ======================================================= */}
-          {/* CENTER: Prominent Desktop SHOP Button (Never Overlaps)  */}
+          {/* CENTER ON DESKTOP: Prominent Desktop SHOP Button       */}
           {/* ======================================================= */}
           <div className="hidden md:flex items-center justify-center px-4">
             <Link
@@ -104,14 +113,14 @@ export default function Header() {
           </div>
 
           {/* ======================================================= */}
-          {/* RIGHT: Profile Icon + Shopping Bag Icon                 */}
+          {/* RIGHT: Profile Icon + Shopping Bag Icon with Glassic    */}
           {/* ======================================================= */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 justify-end z-10">
             
             {/* Wishlist Icon (Desktop Only to keep Mobile Compact) */}
             <Link
               href="/wishlist"
-              className="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md items-center justify-center text-white transition-all relative group shadow-sm active:scale-95"
+              className="hidden sm:flex glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full items-center justify-center text-white relative group"
               aria-label="Wishlist"
             >
               <Heart className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
@@ -125,7 +134,7 @@ export default function Header() {
             {/* Shopping Bag / Cart Icon with Glassic Styling */}
             <Link
               href="/cart"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all relative group shadow-sm active:scale-95"
+              className="glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white relative group"
               aria-label="Shopping Bag"
             >
               <ShoppingBag className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
@@ -144,20 +153,21 @@ export default function Header() {
                   e.stopPropagation();
                   setIsProfileOpen((prev) => !prev);
                 }}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center text-white transition-all group backdrop-blur-md shadow-sm active:scale-95 ${
-                  user
-                    ? 'border-white bg-white/20'
-                    : 'border-white/15 bg-white/10 hover:bg-white/20'
+                className={`glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white relative group ${
+                  user ? 'ring-1 ring-white/60 bg-white/20' : ''
                 }`}
                 aria-expanded={isProfileOpen}
                 aria-label="User Profile"
               >
                 <User className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+                {user && (
+                  <span className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+                )}
               </button>
 
               {/* Profile Dropdown Menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl p-2.5 z-50 animate-fade-in text-xs font-sans text-white">
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl glassic-card p-2.5 z-50 animate-fade-in text-xs font-sans text-white">
                   {user ? (
                     /* Logged In State */
                     <div>
@@ -303,11 +313,11 @@ export default function Header() {
             onClick={() => setIsMenuOpen(false)}
           />
 
-          {/* Drawer Panel */}
-          <div className="fixed top-0 left-0 bottom-0 w-full max-w-sm sm:max-w-md bg-neutral-950 border-r border-neutral-800 shadow-2xl flex flex-col z-50 animate-slide-right overflow-y-auto text-white">
+          {/* Drawer Panel with Frosted Glassic Look */}
+          <div className="fixed top-0 left-0 bottom-0 w-full max-w-sm sm:max-w-md bg-neutral-950/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl flex flex-col z-50 animate-slide-right overflow-y-auto text-white">
             
             {/* Drawer Header */}
-            <div className="p-5 sm:p-6 border-b border-neutral-800/80 flex items-center justify-between bg-neutral-900/60">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.03] backdrop-blur-md">
               <Link
                 href="/"
                 onClick={() => setIsMenuOpen(false)}
@@ -319,7 +329,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(false)}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white flex items-center justify-center border border-neutral-800 transition-all"
+                className="glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full text-white flex items-center justify-center transition-all"
                 aria-label="Close menu"
               >
                 <X className="w-4 h-4" />
@@ -330,7 +340,7 @@ export default function Header() {
             <div className="p-5 sm:p-6 space-y-4 flex-1">
               
               {/* Category 1: Footwear Accordion Dropdown */}
-              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+              <div className="rounded-2xl glassic-card overflow-hidden transition-all">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('footwear')}
@@ -384,7 +394,7 @@ export default function Header() {
               </div>
 
               {/* Category 2: Ready-made Clothes Accordion Dropdown */}
-              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+              <div className="rounded-2xl glassic-card overflow-hidden transition-all">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('ready-made')}
@@ -438,7 +448,7 @@ export default function Header() {
               </div>
 
               {/* Category 3: Concierge & Legal Accordion Dropdown */}
-              <div className="rounded-2xl bg-neutral-900/60 border border-neutral-800/80 overflow-hidden transition-all">
+              <div className="rounded-2xl glassic-card overflow-hidden transition-all">
                 <button
                   type="button"
                   onClick={() => toggleAccordion('concierge')}

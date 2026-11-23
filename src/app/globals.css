@@ -106,6 +106,44 @@ html, body {
   box-shadow: 0 0 0 1px #ffffff;
 }
 
+/* ========================================================================= */
+/* LUXURY GLASIC (GLASSMORPHISM) SUITE                                      */
+/* ========================================================================= */
+.glassic-header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(12, 12, 12, 0.72) 15%, rgba(0, 0, 0, 0.85) 100%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
+}
+
+.glassic-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35), 0 4px 14px 0 rgba(0, 0, 0, 0.45);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glassic-btn:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.09) 100%);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.5), 0 6px 18px 0 rgba(0, 0, 0, 0.55);
+  transform: translateY(-0.5px);
+}
+.glassic-btn:active {
+  transform: scale(0.92);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.14) 100%);
+}
+
+.glassic-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(18, 18, 18, 0.7) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), 0 16px 40px 0 rgba(0, 0, 0, 0.6);
+}
+
 /* Continuous Seamless Infinite Video Carousel */
 @keyframes infiniteVideoMarquee {
   0% {
