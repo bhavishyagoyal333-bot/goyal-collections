@@ -176,17 +176,15 @@ async function runSuite() {
     recordTest(
       'Suite E: Cart & Checkout',
       'Pincode Validation API Service (110001 Delhi)',
-      pinRes.status === 200 && pinData.deliverable,
-      `District: ${pinData.district || 'Central Delhi'}, TAT: ${pinData.estimatedDays || 2} days`
+      pinRes.status === 200 && (pinData.isServiceable || pinData.deliverable),
+      `District: ${pinData.district || 'Central Delhi'}, TAT: ${pinData.deliveryDays || 2} days`
     );
 
     // Place an Order
     const orderPayload = {
-      customer: {
-        name: 'Aarav Test Patron',
-        email: 'aarav.test@example.com',
-        phone: '9876543210',
-      },
+      customerName: 'Aarav Test Patron',
+      email: 'aarav.test@example.com',
+      phone: '9876543210',
       items: [
         {
           id: testProductId || 'mirli-fw-001',
@@ -211,10 +209,10 @@ async function runSuite() {
         state: 'Delhi',
         addressType: 'home',
       },
-      paymentMethod: 'cod',
+      paymentMethod: 'COD',
       subtotal: 4999,
       discount: 0,
-      shippingFee: 0,
+      deliveryCharge: 0,
       totalAmount: 4999,
     };
 
