@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCustomers, getCustomerById, updateCustomerStatus } from '@/lib/db';
+import { getCustomers, getCustomerById, updateCustomerStatus, syncCustomersWithDurableStore, syncOrdersWithDurableStore } from '@/lib/db';
+import { upsertDurableCustomer } from '@/lib/persistentStore';
 import { checkAdminAuth } from '@/lib/adminAuth';
 
 export async function GET(request: NextRequest) {
@@ -8,6 +9,9 @@ export async function GET(request: NextRequest) {
     if (!auth.authorized) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
+
+    await syncOrdersWithDurableStore();
+    await syncCustomersWithDurableStore();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -35,6 +39,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
+    await syncCustomersWithDurableStore();
+
     const body = await request.json();
     const { id, status } = body;
 
@@ -46,6 +52,8 @@ export async function PATCH(request: NextRequest) {
     if (!updated) {
       return NextResponse.json({ success: false, message: 'Customer not found' }, { status: 404 });
     }
+
+    await upsertDurableCustomer(updated);
 
     return NextResponse.json({ success: true, customer: updated });
   } catch (error: any) {

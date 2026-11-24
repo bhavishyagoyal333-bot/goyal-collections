@@ -1,4 +1,4 @@
-import { Order } from './types';
+import { Order, Customer } from './types';
 
 function getStoreToken(): string {
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
@@ -12,21 +12,22 @@ const GITHUB_REPO = 'bhavishyagoyal333-bot/goyal-collections';
 const ISSUE_NUMBER = 1;
 
 let memoryOrdersCache: Order[] | null = null;
+let memoryCustomersCache: Customer[] | null = null;
 let lastFetchTimestamp = 0;
-const CACHE_TTL_MS = 2500; // 2.5 seconds in-memory cache to prevent redundant API calls
+const CACHE_TTL_MS = 2500; // 2.5s in-memory cache to prevent redundant API calls
 
 /**
- * Fetch all orders from the persistent cloud store.
+ * Fetch all data (orders and customers) from the persistent cloud store.
  */
-export async function getDurableOrders(): Promise<Order[]> {
+async function fetchDurableData(): Promise<{ orders: Order[]; customers: Customer[] }> {
   const now = Date.now();
-  if (memoryOrdersCache && now - lastFetchTimestamp < CACHE_TTL_MS) {
-    return memoryOrdersCache;
+  if (memoryOrdersCache && memoryCustomersCache && now - lastFetchTimestamp < CACHE_TTL_MS) {
+    return { orders: memoryOrdersCache, customers: memoryCustomersCache };
   }
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2500);
+    const timeout = setTimeout(() => controller.abort(), 3500);
 
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/issues/${ISSUE_NUMBER}`,
@@ -48,30 +49,62 @@ export async function getDurableOrders(): Promise<Order[]> {
         const parsed = JSON.parse(data.body);
         if (Array.isArray(parsed?.orders)) {
           memoryOrdersCache = parsed.orders;
-          lastFetchTimestamp = now;
-          return parsed.orders;
         }
+        if (Array.isArray(parsed?.customers)) {
+          memoryCustomersCache = parsed.customers;
+        }
+        lastFetchTimestamp = now;
       }
     }
   } catch (err) {
     console.warn('[DURABLE STORE] Fetch error, using cached memory state:', err);
   }
 
-  return memoryOrdersCache || [];
+  return {
+    orders: memoryOrdersCache || [],
+    customers: memoryCustomersCache || [],
+  };
 }
 
 /**
- * Save all orders to the persistent cloud store.
+ * Fetch all orders from the persistent cloud store.
  */
-export async function saveDurableOrders(orders: Order[]): Promise<boolean> {
-  memoryOrdersCache = orders;
+export async function getDurableOrders(): Promise<Order[]> {
+  const data = await fetchDurableData();
+  return data.orders;
+}
+
+/**
+ * Fetch all customers from the persistent cloud store.
+ */
+export async function getDurableCustomers(): Promise<Customer[]> {
+  const data = await fetchDurableData();
+  return data.customers;
+}
+
+/**
+ * Save store data (orders and customers) to the persistent cloud store.
+ */
+export async function saveDurableStore(data: {
+  orders?: Order[];
+  customers?: Customer[];
+}): Promise<boolean> {
+  if (data.orders) memoryOrdersCache = data.orders;
+  if (data.customers) memoryCustomersCache = data.customers;
   lastFetchTimestamp = Date.now();
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3500);
+    const timeout = setTimeout(() => controller.abort(), 4000);
 
-    const bodyContent = JSON.stringify({ orders }, null, 2);
+    const bodyContent = JSON.stringify(
+      {
+        orders: memoryOrdersCache || [],
+        customers: memoryCustomersCache || [],
+      },
+      null,
+      2
+    );
 
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/issues/${ISSUE_NUMBER}`,
@@ -97,6 +130,20 @@ export async function saveDurableOrders(orders: Order[]): Promise<boolean> {
 }
 
 /**
+ * Save all orders to the persistent cloud store.
+ */
+export async function saveDurableOrders(orders: Order[]): Promise<boolean> {
+  return saveDurableStore({ orders });
+}
+
+/**
+ * Save all customers to the persistent cloud store.
+ */
+export async function saveDurableCustomers(customers: Customer[]): Promise<boolean> {
+  return saveDurableStore({ customers });
+}
+
+/**
  * Insert or update a single order in the persistent cloud store.
  */
 export async function upsertDurableOrder(order: Order): Promise<boolean> {
@@ -107,14 +154,12 @@ export async function upsertDurableOrder(order: Order): Promise<boolean> {
 
   let updated: Order[];
   if (existingIdx !== -1) {
-    // Preserve any existing fields that were not explicitly overwritten
     const merged: Order = {
       ...current[existingIdx],
       ...order,
-      // Strictly preserve trackingNumber and courierName if existing had one and new doesn't
       trackingNumber: order.trackingNumber || current[existingIdx].trackingNumber,
       courierName: order.courierName || current[existingIdx].courierName,
-      internalNotes: order.internalNotes || current[existingIdx].internalNotes,
+      internalNotes: order.internalNotes !== undefined ? order.internalNotes : current[existingIdx].internalNotes,
     };
     updated = [...current];
     updated[existingIdx] = merged;
@@ -122,12 +167,74 @@ export async function upsertDurableOrder(order: Order): Promise<boolean> {
     updated = [order, ...current];
   }
 
+  // Also auto-extract and upsert customer from order
+  const custName = (order.customerName || order.shippingAddress?.fullName || '').trim();
+  if (custName && (order.email || order.phone)) {
+    upsertDurableCustomer({
+      id: `cust-${order.id || order.orderNumber}`,
+      fullName: custName,
+      email: order.email || `${order.phone}@goyalcollections.shop`,
+      phone: order.phone || '',
+      createdAt: order.createdAt || new Date().toISOString(),
+      status: 'active',
+      addresses: order.shippingAddress ? [order.shippingAddress] : [],
+      totalOrders: 1,
+      totalSpending: order.totalAmount || 0,
+      lastOrderDate: order.createdAt || new Date().toISOString(),
+    }).catch(() => {});
+  }
+
   return saveDurableOrders(updated);
 }
 
 /**
+ * Insert or update a single customer in the persistent cloud store.
+ */
+export async function upsertDurableCustomer(customer: Customer): Promise<boolean> {
+  const current = await getDurableCustomers();
+  const cleanEmail = (customer.email || '').toLowerCase().trim();
+  const cleanPhone = (customer.phone || '').trim();
+  const cleanId = (customer.id || '').trim();
+
+  const existingIdx = current.findIndex((c) => {
+    const cEmail = (c.email || '').toLowerCase().trim();
+    const cPhone = (c.phone || '').trim();
+    return (
+      (cleanId && c.id === cleanId) ||
+      (cleanEmail && cEmail === cleanEmail) ||
+      (cleanPhone && cPhone === cleanPhone)
+    );
+  });
+
+  let updated: Customer[];
+  if (existingIdx !== -1) {
+    const existing = current[existingIdx];
+    const merged: Customer = {
+      ...existing,
+      ...customer,
+      fullName: customer.fullName?.trim() || existing.fullName,
+      phone: customer.phone?.trim() || existing.phone,
+      email: customer.email?.trim() || existing.email,
+      addresses:
+        customer.addresses && customer.addresses.length > 0
+          ? customer.addresses
+          : existing.addresses || [],
+      totalOrders:
+        customer.totalOrders !== undefined ? customer.totalOrders : existing.totalOrders,
+      totalSpending:
+        customer.totalSpending !== undefined ? customer.totalSpending : existing.totalSpending,
+    };
+    updated = [...current];
+    updated[existingIdx] = merged;
+  } else {
+    updated = [customer, ...current];
+  }
+
+  return saveDurableCustomers(updated);
+}
+
+/**
  * Update an existing order status, AWB tracking number, and notes.
- * Guarantees that AWB number and details are NEVER lost.
  */
 export async function updateDurableOrderStatus(
   idOrNumber: string,
@@ -153,7 +260,6 @@ export async function updateDurableOrderStatus(
   const merged: Order = {
     ...existing,
     ...updates,
-    // Preserve AWB tracking number if not explicitly passed as non-empty
     trackingNumber: updates.trackingNumber?.trim() || existing.trackingNumber,
     courierName: updates.courierName?.trim() || existing.courierName,
     internalNotes: updates.internalNotes !== undefined ? updates.internalNotes : existing.internalNotes,

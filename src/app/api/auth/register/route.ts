@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCustomer } from '@/lib/db';
+import { createCustomer, syncCustomersWithDurableStore } from '@/lib/db';
+import { upsertDurableCustomer } from '@/lib/persistentStore';
 
 export async function POST(request: NextRequest) {
   try {
+    await syncCustomersWithDurableStore();
     const body = await request.json();
     const { name, email, phone, addresses } = body;
 
@@ -19,6 +21,8 @@ export async function POST(request: NextRequest) {
       phone: phone || '',
       addresses: addresses || [],
     });
+
+    await upsertDurableCustomer(customer);
 
     return NextResponse.json({
       success: true,

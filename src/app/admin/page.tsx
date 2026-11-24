@@ -504,6 +504,7 @@ export default function AdminDashboardPage() {
             adminFetch('/api/admin/stats').then((r) => r.json()).then((d) => d.success && setStats(d.stats));
             adminFetch('/api/admin/payments').then((r) => r.json()).then((d) => d.success && setPayments(d.payments));
             adminFetch('/api/admin/shipping').then((r) => r.json()).then((d) => d.success && setShippingRecords(d.shipping));
+            adminFetch('/api/admin/customers').then((r) => r.json()).then((d) => d.success && setCustomers(d.customers));
             adminFetch('/api/admin/notifications').then((r) => r.json()).then((d) => {
               if (d.success) {
                 setNotifications(d.notifications);
@@ -567,6 +568,14 @@ export default function AdminDashboardPage() {
         .then((d) => {
           if (d.success && Array.isArray(d.orders)) {
             setOrders(d.orders);
+          }
+        })
+        .catch(() => {});
+      adminFetch('/api/admin/customers')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success && Array.isArray(d.customers)) {
+            setCustomers(d.customers);
           }
         })
         .catch(() => {});
@@ -1888,7 +1897,7 @@ export default function AdminDashboardPage() {
                             )}
                           </td>
                           <td className="py-3.5 text-neutral-300">
-                            <div>{ord.customerName}</div>
+                            <div>{ord.customerName || ord.shippingAddress?.fullName || 'Valued Customer'}</div>
                             <span className="text-[10px] text-neutral-500 font-mono">{ord.phone}</span>
                           </td>
                           <td className="py-3.5 text-neutral-400 font-mono text-[11px]">
@@ -2329,7 +2338,7 @@ export default function AdminDashboardPage() {
                           )}
                         </td>
                         <td className="py-3.5 font-sans">
-                          <div className="font-semibold text-white">{ord.customerName}</div>
+                          <div className="font-semibold text-white">{ord.customerName || ord.shippingAddress?.fullName || 'Valued Customer'}</div>
                           <span className="text-[10px] text-neutral-400 font-mono">{ord.phone}</span>
                         </td>
                         <td className="py-3.5 text-neutral-400 text-[11px] max-w-xs truncate">
@@ -2424,9 +2433,9 @@ export default function AdminDashboardPage() {
                     {filteredCustomers.map((c) => (
                       <tr key={c.id} className="hover:bg-neutral-800/40 transition-colors">
                         <td className="py-3.5 text-neutral-400 text-[11px]">{c.id}</td>
-                        <td className="py-3.5 font-sans font-semibold text-white">{c.fullName}</td>
+                        <td className="py-3.5 font-sans font-semibold text-white">{c.fullName || 'Valued Customer'}</td>
                         <td className="py-3.5 text-neutral-300">{c.email}</td>
-                        <td className="py-3.5 text-neutral-400">+91 {c.phone}</td>
+                        <td className="py-3.5 text-neutral-400">{c.phone ? (c.phone.startsWith('+91') ? c.phone : '+91 ' + c.phone) : '—'}</td>
                         <td className="py-3.5 text-neutral-400 text-[11px]">
                           {new Date(c.createdAt).toLocaleDateString('en-IN')}
                         </td>
@@ -3807,7 +3816,7 @@ export default function AdminDashboardPage() {
           <div className="rounded-3xl bg-neutral-950 border border-neutral-800 p-6 sm:p-8 max-w-xl w-full my-8 space-y-5 shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
               <div>
-                <h3 className="font-serif text-lg font-bold text-white">{selectedCustomer.fullName}</h3>
+                <h3 className="font-serif text-lg font-bold text-white">{selectedCustomer.fullName || 'Valued Customer'}</h3>
                 <span className="text-[11px] font-mono text-neutral-400">Patron ID: {selectedCustomer.id}</span>
               </div>
               <button onClick={() => setSelectedCustomer(null)} className="text-neutral-400 hover:text-white">
@@ -3826,7 +3835,7 @@ export default function AdminDashboardPage() {
 
               <div className="space-y-2">
                 <span className="text-neutral-400 uppercase text-[10px] font-bold block">Saved Delivery Addresses</span>
-                {selectedCustomer.addresses.map((addr, i) => (
+                {(selectedCustomer.addresses || []).map((addr, i) => (
                   <div key={i} className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-1">
                     <span className="text-white font-sans font-semibold block">{addr.fullName}</span>
                     <p className="text-neutral-400">

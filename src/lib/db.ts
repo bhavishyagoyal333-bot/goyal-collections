@@ -23,6 +23,9 @@ import {
   saveDurableOrders,
   upsertDurableOrder,
   deleteDurableOrder,
+  getDurableCustomers,
+  saveDurableCustomers,
+  upsertDurableCustomer,
 } from './persistentStore';
 
 function getWritableDBPath(): string {
@@ -985,17 +988,87 @@ export function addSubcategory(
 // ================= CUSTOMERS =================
 export function getCustomers(search?: string): Customer[] {
   const db = initDB();
-  let list = [...db.customers];
+  const customerMap = new Map<string, Customer>();
 
-  // Refresh stats for each customer dynamically from orders
+  // 1. Initial / registered customers in db.customers
+  (db.customers || []).forEach((c) => {
+    const key = (c.email || c.phone || c.id).toLowerCase().trim();
+    customerMap.set(key, { ...c });
+  });
+
+  // 2. Automatically derive and include every single customer who ever placed an order
+  (db.orders || []).forEach((o) => {
+    const cleanEmail = (o.email || '').toLowerCase().trim();
+    const cleanPhone = (o.phone || '').trim();
+    const key = cleanEmail || cleanPhone;
+    if (!key) return;
+
+    const existing =
+      customerMap.get(key) ||
+      (cleanEmail ? customerMap.get(cleanEmail) : undefined) ||
+      (cleanPhone ? customerMap.get(cleanPhone) : undefined);
+
+    const orderName = (o.customerName || o.shippingAddress?.fullName || '').trim();
+
+    if (existing) {
+      if (
+        orderName &&
+        (!existing.fullName ||
+          existing.fullName === 'Valued Connoisseur' ||
+          existing.fullName === 'Valued Customer')
+      ) {
+        existing.fullName = orderName;
+      }
+      if (!existing.phone && o.phone) existing.phone = o.phone;
+      if (
+        o.shippingAddress &&
+        (!existing.addresses ||
+          !existing.addresses.some((a) => a.pincode === o.shippingAddress.pincode))
+      ) {
+        if (!existing.addresses) existing.addresses = [];
+        existing.addresses.push(o.shippingAddress);
+      }
+    } else {
+      customerMap.set(key, {
+        id: `cust-${o.id || o.orderNumber}`,
+        fullName: orderName || 'Customer',
+        email: o.email || `${o.phone || 'customer'}@goyalcollections.shop`,
+        phone: o.phone || '',
+        createdAt: o.createdAt || new Date().toISOString(),
+        status: 'active',
+        addresses: o.shippingAddress ? [o.shippingAddress] : [],
+        totalOrders: 1,
+        totalSpending: o.totalAmount || 0,
+        lastOrderDate: o.createdAt || new Date().toISOString(),
+      });
+    }
+  });
+
+  let list = Array.from(customerMap.values());
+
+  // Dynamically calculate actual total orders and spending from all orders in db.orders
   list = list.map((c) => {
-    const custOrders = db.orders.filter(
-      (o) => o.email.toLowerCase() === c.email.toLowerCase() || o.phone === c.phone
-    );
+    const cEmail = (c.email || '').toLowerCase().trim();
+    const cPhone = (c.phone || '').replace(/\D/g, '');
+
+    const custOrders = (db.orders || []).filter((o) => {
+      const oEmail = (o.email || '').toLowerCase().trim();
+      const oShipEmail = (o.shippingAddress?.email || '').toLowerCase().trim();
+      const oPhone = (o.phone || '').replace(/\D/g, '');
+      const oShipPhone = (o.shippingAddress?.phone || '').replace(/\D/g, '');
+
+      const matchEmail = cEmail && (oEmail === cEmail || oShipEmail === cEmail);
+      const matchPhone =
+        cPhone &&
+        ((oPhone && (oPhone.includes(cPhone) || cPhone.includes(oPhone))) ||
+          (oShipPhone && (oShipPhone.includes(cPhone) || cPhone.includes(oShipPhone))));
+      return matchEmail || matchPhone;
+    });
+
     const validOrders = custOrders.filter(
       (o) => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'REFUNDED'
     );
-    const spending = validOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const spending = validOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
     const lastOrder = custOrders[0]?.createdAt || c.lastOrderDate;
 
     return {
@@ -1022,7 +1095,14 @@ export function getCustomers(search?: string): Customer[] {
 
 export function getCustomerById(id: string): { customer: Customer; orders: Order[] } | null {
   const db = initDB();
-  const customer = db.customers.find((c) => c.id === id || c.email === id);
+  const allCustomers = getCustomers();
+  const cleanId = id.trim().toLowerCase();
+  const customer = allCustomers.find(
+    (c) =>
+      c.id === id ||
+      c.email.toLowerCase() === cleanId ||
+      c.phone === id
+  );
   if (!customer) return null;
 
   const orders = db.orders.filter(
@@ -1049,6 +1129,7 @@ export function updateCustomerStatus(
     adminEmail
   );
   saveDB(db);
+  upsertDurableCustomer(customer).catch(() => {});
   return customer;
 }
 
@@ -1059,26 +1140,146 @@ export function createCustomer(customerData: {
   addresses?: any[];
 }): Customer {
   const db = initDB();
-  const existing = db.customers.find((c) => c.email.toLowerCase() === customerData.email.toLowerCase());
+  const cleanEmail = customerData.email.trim().toLowerCase();
+  const cleanPhone = (customerData.phone || '').trim();
+
+  const existing = db.customers.find(
+    (c) =>
+      (cleanEmail && c.email.toLowerCase().trim() === cleanEmail) ||
+      (cleanPhone && c.phone.trim() === cleanPhone)
+  );
+
   if (existing) {
+    if (customerData.fullName) existing.fullName = customerData.fullName.trim();
+    if (customerData.phone) existing.phone = customerData.phone.trim();
+    if (customerData.addresses && customerData.addresses.length > 0) {
+      existing.addresses = customerData.addresses;
+    }
+    saveDB(db);
+    upsertDurableCustomer(existing).catch(() => {});
     return existing;
   }
+
   const newCust: Customer = {
     id: `cust-${Date.now()}`,
-    fullName: customerData.fullName,
-    email: customerData.email,
-    phone: customerData.phone,
+    fullName: customerData.fullName.trim(),
+    email: customerData.email.trim(),
+    phone: (customerData.phone || '').trim(),
     createdAt: new Date().toISOString(),
     status: 'active',
     addresses: customerData.addresses || [],
     totalOrders: 0,
     totalSpending: 0,
   };
+
   db.customers.unshift(newCust);
-  logAdminActivity('Customer Registered', 'Customer', `New customer account registered: ${newCust.fullName} (${newCust.email})`, 'System');
+  logAdminActivity(
+    'Customer Registered',
+    'Customer',
+    `New customer registered: ${newCust.fullName} (${newCust.email})`,
+    'System'
+  );
   saveDB(db);
+
+  // Commit immediately to durable cloud store
+  upsertDurableCustomer(newCust).catch((err) =>
+    console.warn('[DURABLE STORE] Customer upsert error:', err)
+  );
+
   emitRealtimeEvent('customer:created', newCust);
   return newCust;
+}
+
+/**
+ * Synchronize local customers with the durable cloud persistent store.
+ * Guarantees that any registered customer or customer who placed an order
+ * is permanently stored and visible in the Admin Panel!
+ */
+export async function syncCustomersWithDurableStore(): Promise<Customer[]> {
+  try {
+    const durableCustomers = await getDurableCustomers();
+    const db = initDB();
+
+    const customerMap = new Map<string, Customer>();
+
+    // 1. Load initial/local customers
+    (db.customers || []).forEach((c) => {
+      const key = (c.email || c.phone || c.id).toLowerCase().trim();
+      customerMap.set(key, c);
+    });
+
+    // 2. Merge durable customers
+    (durableCustomers || []).forEach((c) => {
+      const key = (c.email || c.phone || c.id).toLowerCase().trim();
+      const existing = customerMap.get(key);
+      if (existing) {
+        customerMap.set(key, { ...existing, ...c });
+      } else {
+        customerMap.set(key, c);
+      }
+    });
+
+    // 3. Merge all customers from placed orders
+    (db.orders || []).forEach((o) => {
+      const cleanEmail = (o.email || '').toLowerCase().trim();
+      const cleanPhone = (o.phone || '').trim();
+      const key = cleanEmail || cleanPhone;
+      if (!key) return;
+
+      const existing =
+        customerMap.get(key) ||
+        (cleanEmail ? customerMap.get(cleanEmail) : undefined) ||
+        (cleanPhone ? customerMap.get(cleanPhone) : undefined);
+
+      const orderName = (o.customerName || o.shippingAddress?.fullName || '').trim();
+
+      if (existing) {
+        if (
+          orderName &&
+          (!existing.fullName ||
+            existing.fullName === 'Valued Connoisseur' ||
+            existing.fullName === 'Valued Customer')
+        ) {
+          existing.fullName = orderName;
+        }
+        if (!existing.phone && o.phone) existing.phone = o.phone;
+      } else {
+        customerMap.set(key, {
+          id: `cust-${o.id || o.orderNumber}`,
+          fullName: orderName || 'Customer',
+          email: o.email || `${o.phone || 'customer'}@goyalcollections.shop`,
+          phone: o.phone || '',
+          createdAt: o.createdAt || new Date().toISOString(),
+          status: 'active',
+          addresses: o.shippingAddress ? [o.shippingAddress] : [],
+          totalOrders: 1,
+          totalSpending: o.totalAmount || 0,
+          lastOrderDate: o.createdAt || new Date().toISOString(),
+        });
+      }
+    });
+
+    const mergedList: Customer[] = [];
+    const seenKeys = new Set<string>();
+    Array.from(customerMap.values()).forEach((c) => {
+      const k = (c.email || c.phone || c.id).toLowerCase().trim();
+      if (!seenKeys.has(k)) {
+        seenKeys.add(k);
+        mergedList.push(c);
+      }
+    });
+
+    mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    db.customers = mergedList;
+    saveDB(db);
+
+    saveDurableCustomers(mergedList).catch(() => {});
+
+    return db.customers;
+  } catch (err) {
+    console.warn('[CUSTOMER SYNC] Error syncing customers with durable store:', err);
+    return initDB().customers;
+  }
 }
 
 /**
@@ -2074,7 +2275,8 @@ export function getAdminStats() {
 
   const totalProducts = db.products.length;
   const activeProducts = db.products.filter((p) => p.status !== 'inactive').length;
-  const totalCustomers = db.customers.length;
+  const allCurrentCustomers = getCustomers();
+  const totalCustomers = allCurrentCustomers.length;
 
   const lowStockProducts = db.products.filter((p) => p.stock < 15);
   const outOfStockProducts = db.products.filter((p) => p.stock === 0);
