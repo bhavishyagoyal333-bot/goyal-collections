@@ -208,6 +208,28 @@ function OrderTrackingContent() {
             </div>
           </div>
 
+          {/* Courier & AWB Waybill Details */}
+          {(order.trackingNumber || order.courierName) && (
+            <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-neutral-950 border border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center text-white shrink-0">
+                  <Truck className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-neutral-400 block">Logistics Partner</span>
+                  <span className="text-sm font-bold text-white">{order.courierName || 'Blue Dart Express Air'}</span>
+                </div>
+              </div>
+
+              {order.trackingNumber && (
+                <div className="text-left sm:text-right">
+                  <span className="text-[10px] uppercase font-mono text-neutral-400 block">Air Waybill (AWB) / Tracking No.</span>
+                  <span className="font-mono font-bold text-amber-400 text-sm tracking-wider select-all">{order.trackingNumber}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Logistics Timeline */}
           <div>
             <h4 className="text-xs uppercase font-mono tracking-widest text-neutral-400 mb-6">

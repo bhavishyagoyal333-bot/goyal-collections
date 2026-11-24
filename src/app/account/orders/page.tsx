@@ -14,9 +14,9 @@ export default function MyOrdersPage() {
 
   useEffect(() => {
     async function fetchOrders() {
-      setLoading(true);
       try {
         const params = new URLSearchParams();
+        if (user?.id) params.set('userId', user.id);
         if (user?.email) params.set('email', user.email);
         if (user?.phone) params.set('phone', user.phone);
 
@@ -61,6 +61,10 @@ export default function MyOrdersPage() {
       }
     }
     fetchOrders();
+
+    // Auto-polling every 10 seconds to keep order status and tracking synced in real-time
+    const interval = setInterval(fetchOrders, 10000);
+    return () => clearInterval(interval);
   }, [user]);
 
   const filteredOrders = statusFilter === 'all'
@@ -145,6 +149,19 @@ export default function MyOrdersPage() {
                   <span className="text-neutral-400 font-mono text-[11px] block mt-1">
                     Ordered on <strong className="text-white font-medium">{new Date(ord.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(ord.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</strong>
                   </span>
+                  {ord.trackingNumber && (
+                    <div className="flex items-center gap-2 mt-2 px-3 py-1 rounded-xl bg-neutral-950 border border-neutral-800 text-[11px] font-mono">
+                      <Truck className="w-3.5 h-3.5 text-neutral-400" />
+                      <span className="text-neutral-400">AWB:</span>
+                      <span className="font-bold text-amber-400 tracking-wider">{ord.trackingNumber}</span>
+                      {ord.courierName && (
+                        <>
+                          <span className="text-neutral-600">•</span>
+                          <span className="text-neutral-300">{ord.courierName}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-mono">

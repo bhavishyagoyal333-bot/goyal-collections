@@ -560,8 +560,21 @@ export default function AdminDashboardPage() {
       console.warn('SSE initialization notice:', err);
     }
 
+    // Background sync polling interval to ensure cross-device and serverless updates stay fresh
+    const pollInterval = setInterval(() => {
+      adminFetch('/api/admin/orders')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.success && Array.isArray(d.orders)) {
+            setOrders(d.orders);
+          }
+        })
+        .catch(() => {});
+    }, 10000);
+
     return () => {
       if (es) es.close();
+      clearInterval(pollInterval);
     };
   }, [isAuthenticated, soundEnabled]);
 
@@ -809,19 +822,26 @@ export default function AdminDashboardPage() {
     setActionLoading(true);
 
     try {
+      const trimmedTracking = trackingNumber?.trim();
+      const finalTracking = trimmedTracking || selectedOrder.trackingNumber || '';
+      const trimmedCourier = courierName?.trim();
+      const finalCourier = trimmedCourier || selectedOrder.courierName || 'Blue Dart Express Air';
+
       const res = await adminFetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: orderStatusUpdate,
-          notes: orderNotes,
-          courierName,
-          trackingNumber,
+          notes: orderNotes?.trim() || undefined,
+          courierName: finalCourier,
+          trackingNumber: finalTracking,
         }),
       });
       const data = await res.json();
       if (data.success && data.order) {
         setSelectedOrder(data.order);
+        setCourierName(data.order.courierName || '');
+        setTrackingNumber(data.order.trackingNumber || '');
         setOrders((prev) => prev.map((o) => (o.id === data.order.id ? data.order : o)));
         showToast(`Order ${data.order.orderNumber} updated to "${orderStatusUpdate}".`);
         loadAllData();
@@ -1859,7 +1879,14 @@ export default function AdminDashboardPage() {
                     <tbody className="divide-y divide-neutral-800/60">
                       {orders.slice(0, 6).map((ord) => (
                         <tr key={ord.id} className="hover:bg-neutral-800/40 transition-colors">
-                          <td className="py-3.5 font-mono font-bold text-white">{ord.orderNumber}</td>
+                          <td className="py-3.5 font-mono text-white">
+                            <span className="font-bold">{ord.orderNumber}</span>
+                            {ord.trackingNumber && (
+                              <span className="block text-[10px] text-amber-400 font-mono tracking-wider">
+                                AWB: {ord.trackingNumber}
+                              </span>
+                            )}
+                          </td>
                           <td className="py-3.5 text-neutral-300">
                             <div>{ord.customerName}</div>
                             <span className="text-[10px] text-neutral-500 font-mono">{ord.phone}</span>
@@ -2295,6 +2322,11 @@ export default function AdminDashboardPage() {
                               </span>
                             )}
                           </div>
+                          {ord.trackingNumber && (
+                            <span className="block text-[10px] text-amber-400 font-mono tracking-wider mt-0.5 font-normal">
+                              AWB: {ord.trackingNumber}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 font-sans">
                           <div className="font-semibold text-white">{ord.customerName}</div>

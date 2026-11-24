@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrders, createOrder, deleteOrder, deleteOrdersByCustomer } from '@/lib/db';
+import { getOrders, createOrder, deleteOrder, deleteOrdersByCustomer, syncOrdersWithDurableStore } from '@/lib/db';
+import { upsertDurableOrder } from '@/lib/persistentStore';
 
 export async function GET(request: NextRequest) {
   try {
+    await syncOrdersWithDurableStore();
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email') || undefined;
     const phone = searchParams.get('phone') || undefined;
@@ -74,7 +76,11 @@ export async function POST(request: NextRequest) {
       totalAmount: Number(body.totalAmount ?? body.total ?? 0),
       paymentMethod: body.paymentMethod || 'COD',
       paymentId: body.paymentId,
+      userId: body.userId || (body.user?.id) || undefined,
     });
+
+    // Durably store to persistent cloud store before acknowledging 201 Created
+    await upsertDurableOrder(order);
 
     return NextResponse.json({ success: true, order }, { status: 201 });
   } catch (error: any) {

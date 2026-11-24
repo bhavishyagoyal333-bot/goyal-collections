@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updateOrderStatus, deleteOrder } from '@/lib/db';
+import { getOrderById, updateOrderStatus, deleteOrder, syncOrdersWithDurableStore } from '@/lib/db';
+import { upsertDurableOrder, deleteDurableOrder } from '@/lib/persistentStore';
 import { checkAdminAuth } from '@/lib/adminAuth';
 import { OrderStatus } from '@/lib/types';
 
@@ -12,6 +13,8 @@ export async function GET(
     if (!auth.authorized) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
+
+    await syncOrdersWithDurableStore();
 
     const order = getOrderById(params.id);
     if (!order) {
@@ -33,6 +36,8 @@ export async function PATCH(
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
+    await syncOrdersWithDurableStore();
+
     const id = params.id;
     const body = await request.json();
     const { status, notes, courierName, trackingNumber } = body;
@@ -52,6 +57,8 @@ export async function PATCH(
       return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
     }
 
+    await upsertDurableOrder(updated);
+
     return NextResponse.json({ success: true, order: updated });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -70,12 +77,16 @@ export async function DELETE(
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
+    await syncOrdersWithDurableStore();
+
     const id = params.id;
     const deleted = deleteOrder(id, auth.email);
 
     if (!deleted) {
       return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
     }
+
+    await deleteDurableOrder(id);
 
     return NextResponse.json({ success: true, message: 'Order successfully deleted' });
   } catch (error: any) {

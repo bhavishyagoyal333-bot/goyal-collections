@@ -18,6 +18,12 @@ import {
   AdminUser,
 } from './types';
 import { emitRealtimeEvent } from './events';
+import {
+  getDurableOrders,
+  saveDurableOrders,
+  upsertDurableOrder,
+  deleteDurableOrder,
+} from './persistentStore';
 
 function getWritableDBPath(): string {
   // In serverless / AWS Lambda / Vercel or any production deployment, always use /tmp
@@ -1075,6 +1081,77 @@ export function createCustomer(customerData: {
   return newCust;
 }
 
+/**
+ * Synchronize local orders with the durable cloud persistent store.
+ * Guarantees cross-instance consistency across Vercel serverless containers.
+ */
+export async function syncOrdersWithDurableStore(): Promise<Order[]> {
+  try {
+    const durableOrders = await getDurableOrders();
+    const db = initDB();
+
+    if (!Array.isArray(durableOrders) || durableOrders.length === 0) {
+      if (db.orders && db.orders.length > 0) {
+        await saveDurableOrders(db.orders);
+      }
+      return db.orders;
+    }
+
+    const orderMap = new Map<string, Order>();
+
+    // Initial local orders
+    for (const ord of db.orders) {
+      orderMap.set(ord.id, ord);
+      orderMap.set(ord.orderNumber, ord);
+    }
+
+    // Merge durable orders, preserving fields intelligently
+    for (const dOrd of durableOrders) {
+      const existing = orderMap.get(dOrd.id) || orderMap.get(dOrd.orderNumber);
+      if (existing) {
+        const merged: Order = {
+          ...existing,
+          ...dOrd,
+          trackingNumber: dOrd.trackingNumber?.trim() || existing.trackingNumber,
+          courierName: dOrd.courierName?.trim() || existing.courierName,
+          internalNotes: dOrd.internalNotes !== undefined ? dOrd.internalNotes : existing.internalNotes,
+          orderStatus: dOrd.orderStatus || existing.orderStatus,
+          statusHistory:
+            dOrd.statusHistory && dOrd.statusHistory.length >= (existing.statusHistory?.length || 0)
+              ? dOrd.statusHistory
+              : existing.statusHistory,
+          trackingTimeline:
+            dOrd.trackingTimeline && dOrd.trackingTimeline.length >= (existing.trackingTimeline?.length || 0)
+              ? dOrd.trackingTimeline
+              : existing.trackingTimeline,
+        };
+        orderMap.set(dOrd.id, merged);
+        orderMap.set(dOrd.orderNumber, merged);
+      } else {
+        orderMap.set(dOrd.id, dOrd);
+        orderMap.set(dOrd.orderNumber, dOrd);
+      }
+    }
+
+    const mergedList: Order[] = [];
+    const seenIds = new Set<string>();
+    Array.from(orderMap.values()).forEach((ord) => {
+      if (!seenIds.has(ord.id)) {
+        seenIds.add(ord.id);
+        mergedList.push(ord);
+      }
+    });
+
+    mergedList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    db.orders = mergedList;
+    saveDB(db);
+    return db.orders;
+  } catch (err) {
+    console.warn('[DB SYNC] Error syncing with durable store:', err);
+    return initDB().orders;
+  }
+}
+
 // ================= ORDERS =================
 export function getOrders(filter?: {
   email?: string;
@@ -1088,8 +1165,27 @@ export function getOrders(filter?: {
 
   const cleanEmail = filter?.email ? filter.email.trim().toLowerCase() : '';
   const cleanPhone = filter?.phone ? filter.phone.replace(/\D/g, '') : '';
+  const cleanUserId = filter?.userId ? filter.userId.trim() : '';
 
-  if (cleanEmail && cleanPhone) {
+  if (cleanUserId && cleanUserId !== 'guest') {
+    orders = orders.filter((o) => {
+      if ((o as any).userId && (o as any).userId === cleanUserId) return true;
+      const oEmail = (o.email || '').toLowerCase().trim();
+      const oShipEmail = (o.shippingAddress?.email || '').toLowerCase().trim();
+      const oPhone = (o.phone || '').replace(/\D/g, '');
+      const oShipPhone = (o.shippingAddress?.phone || '').replace(/\D/g, '');
+
+      const matchEmail = cleanEmail && (oEmail === cleanEmail || oShipEmail === cleanEmail);
+      const matchPhone = cleanPhone && (
+        oPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oPhone) ||
+        oShipPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oShipPhone)
+      );
+
+      return matchEmail || matchPhone;
+    });
+  } else if (cleanEmail && cleanPhone) {
     orders = orders.filter((o) => {
       const oEmail = (o.email || '').toLowerCase().trim();
       const oShipEmail = (o.shippingAddress?.email || '').toLowerCase().trim();
@@ -1168,6 +1264,9 @@ export function createOrder(data: {
   totalAmount: number;
   paymentMethod: 'COD' | 'ONLINE';
   paymentId?: string;
+  userId?: string;
+  courierName?: string;
+  trackingNumber?: string;
 }): Order {
   const db = initDB();
   const now = new Date();
@@ -1276,6 +1375,9 @@ export function createOrder(data: {
     paymentMethod: data.paymentMethod,
     paymentStatus: data.paymentMethod === 'ONLINE' ? 'PAID' : 'PENDING',
     paymentId: data.paymentId || (data.paymentMethod === 'ONLINE' ? `pay_sim_${Date.now()}` : undefined),
+    userId: data.userId || undefined,
+    courierName: data.courierName || 'Blue Dart Express Air',
+    trackingNumber: data.trackingNumber || `GC-AIR-${randomSuffix}`,
     orderStatus: 'Order Placed',
     trackingTimeline,
     estimatedDeliveryDate,
@@ -1375,8 +1477,8 @@ export function createOrder(data: {
     city: newOrder.shippingAddress.district || 'New Delhi',
     state: newOrder.shippingAddress.state || 'Delhi',
     pincode: newOrder.shippingAddress.pincode,
-    courierName: 'Delhivery',
-    trackingNumber: `DEL-${Date.now().toString().slice(-8)}`,
+    courierName: (newOrder.courierName as any) || 'Blue Dart Express Air',
+    trackingNumber: newOrder.trackingNumber || `DEL-${Date.now().toString().slice(-8)}`,
     dispatchDate: now.toISOString(),
     estimatedDelivery: estimatedDeliveryDate,
     status: 'Manifested',
@@ -1404,6 +1506,11 @@ export function createOrder(data: {
   db.notifications.unshift(newNotification);
 
   saveDB(db);
+
+  // Durably persist to cloud store immediately
+  upsertDurableOrder(newOrder).catch((err) =>
+    console.warn('[DURABLE STORE] Background order upsert error:', err)
+  );
 
   // Broadcast real-time event to all connected admin and customer clients
   emitRealtimeEvent('order:created', {
@@ -1443,11 +1550,11 @@ export function updateOrderStatus(
   order.updatedAt = now.toISOString();
 
   if (options?.notes) order.internalNotes = options.notes;
-  if (options?.courierName) order.courierName = options.courierName;
-  if (options?.trackingNumber) order.trackingNumber = options.trackingNumber;
+  if (options?.courierName?.trim()) order.courierName = options.courierName.trim();
+  if (options?.trackingNumber?.trim()) order.trackingNumber = options.trackingNumber.trim();
 
   // Initialize statusHistory if missing
-  if (!order.statusHistory) {
+  if (!Array.isArray(order.statusHistory)) {
     order.statusHistory = [];
   }
   order.statusHistory.push({
@@ -1510,6 +1617,9 @@ export function updateOrderStatus(
   ];
 
   const targetIdx = statusesSequence.indexOf(newStatus);
+  if (!Array.isArray(order.trackingTimeline)) {
+    order.trackingTimeline = [];
+  }
   if (targetIdx !== -1) {
     order.trackingTimeline.forEach((step) => {
       const stepIdx = statusesSequence.indexOf(step.status);
@@ -1546,8 +1656,10 @@ export function updateOrderStatus(
       else if (newStatus === 'Out for Delivery') shipRec.status = 'Out for Delivery';
       else if (newStatus === 'Delivered') shipRec.status = 'Delivered';
       else if (newStatus === 'Returned') shipRec.status = 'Returned';
-      if (options?.trackingNumber) shipRec.trackingNumber = options.trackingNumber;
-      if (options?.courierName) shipRec.courierName = options.courierName as any;
+      if (options?.trackingNumber?.trim()) shipRec.trackingNumber = options.trackingNumber.trim();
+      else if (order.trackingNumber) shipRec.trackingNumber = order.trackingNumber;
+      if (options?.courierName?.trim()) shipRec.courierName = options.courierName.trim() as any;
+      else if (order.courierName) shipRec.courierName = order.courierName as any;
     }
   }
 
@@ -1565,6 +1677,11 @@ export function updateOrderStatus(
   }
 
   saveDB(db);
+
+  // Durably persist updated status and tracking info
+  upsertDurableOrder(order).catch((err) =>
+    console.warn('[DURABLE STORE] Background status upsert error:', err)
+  );
 
   // Broadcast real-time order update event
   emitRealtimeEvent('order:updated', order);
@@ -1602,6 +1719,12 @@ export function deleteOrder(orderIdOrNumber: string, adminEmail = 'admin@mirli.s
 
   logAdminActivity('Order Deleted', 'Order', `Order ${order.orderNumber} deleted`, adminEmail);
   saveDB(db);
+
+  // Delete from durable cloud store
+  deleteDurableOrder(order.id).catch((err) =>
+    console.warn('[DURABLE STORE] Background delete error:', err)
+  );
+
   emitRealtimeEvent('order:deleted', { orderId: order.id, orderNumber: order.orderNumber });
   return true;
 }
@@ -1636,6 +1759,11 @@ export function deleteOrdersByCustomer(query: string, adminEmail = 'admin@mirli.
 
   logAdminActivity('Customer Orders Cleared', 'Order', `Cleared ${matchingOrders.length} orders for ${query}`, adminEmail);
   saveDB(db);
+
+  for (const o of matchingOrders) {
+    deleteDurableOrder(o.id).catch(() => {});
+  }
+
   emitRealtimeEvent('order:deleted', { query, count: matchingOrders.length });
   return matchingOrders.length;
 }

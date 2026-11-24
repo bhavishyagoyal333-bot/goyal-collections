@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrders } from '@/lib/db';
+import { getOrders, syncOrdersWithDurableStore } from '@/lib/db';
 import { checkAdminAuth } from '@/lib/adminAuth';
 import { OrderStatus } from '@/lib/types';
 
@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
     if (!auth.authorized) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
+
+    await syncOrdersWithDurableStore();
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || undefined;
