@@ -65,12 +65,12 @@ export async function POST(request: NextRequest) {
       token,
     });
 
-    // Set secure HTTP-only cookie
+    // Set HTTP-only cookie (secure only when running over https or on Vercel)
     response.cookies.set({
       name: SESSION_COOKIE_NAME,
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.VERCEL ? true : false,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days

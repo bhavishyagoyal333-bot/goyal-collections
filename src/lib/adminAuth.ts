@@ -51,20 +51,37 @@ export function verifyAdminToken(token: string | undefined): { valid: boolean; e
 }
 
 export function checkAdminAuth(request: NextRequest): { authorized: boolean; email?: string } {
-  // Check cookie first
+  // 1. Check cookie first
   const cookie = request.cookies.get(SESSION_COOKIE_NAME);
   if (cookie?.value) {
     const res = verifyAdminToken(cookie.value);
     if (res.valid) return { authorized: true, email: res.email };
   }
 
-  // Check Authorization header as fallback
-  const authHeader = request.headers.get('Authorization');
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
+  // 2. Check Authorization header (case-insensitive)
+  const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
+  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+    const token = authHeader.substring(7).trim();
     const res = verifyAdminToken(token);
     if (res.valid) return { authorized: true, email: res.email };
   }
+
+  // 3. Check custom header x-admin-token
+  const customHeader = request.headers.get('x-admin-token');
+  if (customHeader) {
+    const res = verifyAdminToken(customHeader.trim());
+    if (res.valid) return { authorized: true, email: res.email };
+  }
+
+  // 4. Check query param adminToken
+  try {
+    const { searchParams } = new URL(request.url);
+    const queryToken = searchParams.get('adminToken') || searchParams.get('token');
+    if (queryToken) {
+      const res = verifyAdminToken(queryToken.trim());
+      if (res.valid) return { authorized: true, email: res.email };
+    }
+  } catch {}
 
   return { authorized: false };
 }

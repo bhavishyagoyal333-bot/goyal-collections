@@ -609,27 +609,26 @@ export function initDB(): DatabaseSchema {
 
 export function saveDB(data: DatabaseSchema): void {
   memoryCache = data;
-  try {
-    const writablePath = getWritableDBPath();
-    const targetDir = path.dirname(writablePath);
-    if (!fs.existsSync(targetDir)) {
-      try {
-        fs.mkdirSync(targetDir, { recursive: true });
-      } catch {}
-    }
-    const tempFile = `${writablePath}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf-8');
-    fs.renameSync(tempFile, writablePath);
-    lastDiskMtime = Date.now();
-  } catch (err: any) {
-    try {
-      const writablePath = getWritableDBPath();
-      fs.writeFileSync(writablePath, JSON.stringify(data, null, 2), 'utf-8');
-      lastDiskMtime = Date.now();
-    } catch (directErr: any) {
-      console.warn('Filesystem save notice (active memory state):', directErr.message);
-    }
+  const pathsToSave: string[] = [];
+
+  const primaryPath = getWritableDBPath();
+  pathsToSave.push(primaryPath);
+
+  const localPath = path.join(process.cwd(), 'data', 'database.json');
+  if (!pathsToSave.includes(localPath)) {
+    pathsToSave.push(localPath);
   }
+
+  for (const p of pathsToSave) {
+    try {
+      const dir = path.dirname(p);
+      if (!fs.existsSync(dir)) {
+        try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+      }
+      fs.writeFileSync(p, JSON.stringify(data, null, 2), 'utf-8');
+    } catch {}
+  }
+  lastDiskMtime = Date.now();
 }
 
 // ================= ACTIVITY LOGS =================
@@ -838,7 +837,10 @@ export function updateProduct(
   adminEmail = 'admin@mirli.store'
 ): Product | null {
   const db = initDB();
-  const index = db.products.findIndex((p) => p.id === id);
+  const cleanId = decodeURIComponent(id || '').trim().toLowerCase();
+  const index = db.products.findIndex(
+    (p) => p.id === id || p.slug === id || p.id.toLowerCase() === cleanId || p.slug.toLowerCase() === cleanId
+  );
   if (index === -1) return null;
 
   const oldProduct = db.products[index];
@@ -1379,7 +1381,10 @@ export function updateOrderStatus(
   }
 ): Order | null {
   const db = initDB();
-  const order = db.orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+  const cleanId = decodeURIComponent(orderId || '').trim().toLowerCase();
+  const order = db.orders.find(
+    (o) => o.id === orderId || o.orderNumber === orderId || o.id.toLowerCase() === cleanId || o.orderNumber.toLowerCase() === cleanId
+  );
   if (!order) return null;
 
   const previousStatus = order.orderStatus;

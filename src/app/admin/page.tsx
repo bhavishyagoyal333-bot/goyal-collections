@@ -288,6 +288,30 @@ export default function AdminDashboardPage() {
     checkAuth();
   }, []);
 
+  
+  // Robust Admin Fetch wrapper ensuring auth token & credentials in all network calls
+  const adminFetch = async (url: string, options: RequestInit = {}) => {
+    let token = '';
+    try {
+      token = typeof window !== 'undefined' ? localStorage.getItem('mirli_admin_token') || '' : '';
+    } catch {}
+
+    const incomingHeaders = (options.headers as Record<string, string>) || {};
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+    const headers: Record<string, string> = {
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(token ? { Authorization: `Bearer ${token}`, 'x-admin-token': token } : {}),
+      ...incomingHeaders,
+    };
+
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers,
+    });
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -295,7 +319,7 @@ export default function AdminDashboardPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/admin/auth');
+      const res = await adminFetch('/api/admin/auth');
       const data = await res.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
@@ -316,13 +340,18 @@ export default function AdminDashboardPage() {
     setLoginLoading(true);
 
     try {
-      const res = await fetch('/api/admin/auth', {
+      const res = await adminFetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: loginEmail, password: loginPassword }),
       });
       const data = await res.json();
       if (data.success) {
+        if (data.token) {
+          try {
+            localStorage.setItem('mirli_admin_token', data.token);
+          } catch {}
+        }
         setIsAuthenticated(true);
         showToast('Authorized. Welcome to GOYAL COLLECTIONS Admin Command Center.');
         loadAllData();
@@ -338,7 +367,10 @@ export default function AdminDashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/admin/auth', { method: 'DELETE' });
+      await adminFetch('/api/admin/auth', { method: 'DELETE' });
+    } catch {}
+    try {
+      localStorage.removeItem('mirli_admin_token');
     } catch {}
     setIsAuthenticated(false);
     showToast('Signed out securely.');
@@ -367,21 +399,21 @@ export default function AdminDashboardPage() {
         notifRes,
         usersRes,
       ] = await Promise.all([
-        fetch('/api/admin/stats').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/products').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/categories').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/orders').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/customers').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/inventory').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/reviews').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/coupons').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/banners').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/logs').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/settings').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/payments').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/shipping').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/notifications').then((r) => r.json()).catch(() => ({ success: false })),
-        fetch('/api/admin/users').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/stats').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/products').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/categories').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/orders').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/customers').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/inventory').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/reviews').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/coupons').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/banners').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/logs').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/settings').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/payments').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/shipping').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/notifications').then((r) => r.json()).catch(() => ({ success: false })),
+        adminFetch('/api/admin/users').then((r) => r.json()).catch(() => ({ success: false })),
       ]);
 
       if (statsRes?.success) setStats(statsRes.stats);
@@ -469,10 +501,10 @@ export default function AdminDashboardPage() {
             setToastMessage(`🚨 NEW ORDER #${data.order.orderNumber} - ₹${data.order.totalAmount.toLocaleString('en-IN')}`);
             setTimeout(() => setToastMessage(null), 8000);
             
-            fetch('/api/admin/stats').then((r) => r.json()).then((d) => d.success && setStats(d.stats));
-            fetch('/api/admin/payments').then((r) => r.json()).then((d) => d.success && setPayments(d.payments));
-            fetch('/api/admin/shipping').then((r) => r.json()).then((d) => d.success && setShippingRecords(d.shipping));
-            fetch('/api/admin/notifications').then((r) => r.json()).then((d) => {
+            adminFetch('/api/admin/stats').then((r) => r.json()).then((d) => d.success && setStats(d.stats));
+            adminFetch('/api/admin/payments').then((r) => r.json()).then((d) => d.success && setPayments(d.payments));
+            adminFetch('/api/admin/shipping').then((r) => r.json()).then((d) => d.success && setShippingRecords(d.shipping));
+            adminFetch('/api/admin/notifications').then((r) => r.json()).then((d) => {
               if (d.success) {
                 setNotifications(d.notifications);
                 setUnreadNotificationsCount(d.unreadCount);
@@ -490,39 +522,39 @@ export default function AdminDashboardPage() {
           const order = data?.order || data;
           if (order && order.id) {
             setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
-            fetch('/api/admin/shipping').then((r) => r.json()).then((d) => d.success && setShippingRecords(d.shipping));
-            fetch('/api/admin/payments').then((r) => r.json()).then((d) => d.success && setPayments(d.payments));
+            adminFetch('/api/admin/shipping').then((r) => r.json()).then((d) => d.success && setShippingRecords(d.shipping));
+            adminFetch('/api/admin/payments').then((r) => r.json()).then((d) => d.success && setPayments(d.payments));
           }
         } catch (err) {}
       });
 
       es.addEventListener('product:updated', () => {
-        fetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
+        adminFetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
       });
 
       es.addEventListener('product:created', () => {
-        fetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
+        adminFetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
       });
 
       es.addEventListener('product:deleted', () => {
-        fetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
+        adminFetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
       });
 
       es.addEventListener('stock:updated', () => {
-        fetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
-        fetch('/api/admin/inventory').then((r) => r.json()).then((d) => d.success && setInventoryLogs(d.logs));
+        adminFetch('/api/admin/products').then((r) => r.json()).then((d) => d.success && setProducts(d.products));
+        adminFetch('/api/admin/inventory').then((r) => r.json()).then((d) => d.success && setInventoryLogs(d.logs));
       });
 
       es.addEventListener('customer:created', () => {
-        fetch('/api/admin/customers').then((r) => r.json()).then((d) => d.success && setCustomers(d.customers));
+        adminFetch('/api/admin/customers').then((r) => r.json()).then((d) => d.success && setCustomers(d.customers));
       });
 
       es.addEventListener('review:updated', () => {
-        fetch('/api/admin/reviews').then((r) => r.json()).then((d) => d.success && setReviews(d.reviews));
+        adminFetch('/api/admin/reviews').then((r) => r.json()).then((d) => d.success && setReviews(d.reviews));
       });
 
       es.addEventListener('category:updated', () => {
-        fetch('/api/admin/categories').then((r) => r.json()).then((d) => d.success && setCategories(d.categories));
+        adminFetch('/api/admin/categories').then((r) => r.json()).then((d) => d.success && setCategories(d.categories));
       });
     } catch (err) {
       console.warn('SSE initialization notice:', err);
@@ -550,7 +582,7 @@ export default function AdminDashboardPage() {
 
     try {
       setActionLoading(true);
-      const res = await fetch('/api/admin/upload', {
+      const res = await adminFetch('/api/admin/upload', {
         method: 'POST',
         body: formData,
       });
@@ -695,20 +727,22 @@ export default function AdminDashboardPage() {
 
     try {
       if (editingProduct) {
-        const res = await fetch(`/api/admin/products/${editingProduct.id}`, {
+        const res = await adminFetch(`/api/admin/products/${editingProduct.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.product) {
           setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? data.product : p)));
           setIsProductModalOpen(false);
           showToast(`Updated "${prodForm.name}" successfully!`);
           loadAllData();
+        } else {
+          showToast(data.message || 'Failed to update product.');
         }
       } else {
-        const res = await fetch('/api/admin/products', {
+        const res = await adminFetch('/api/admin/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -731,7 +765,7 @@ export default function AdminDashboardPage() {
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to permanently delete "${name}" from the store catalog?`)) return;
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setProducts((prev) => prev.filter((p) => p.id !== id));
@@ -746,7 +780,7 @@ export default function AdminDashboardPage() {
   const handleToggleProductStatus = async (prod: Product) => {
     const nextStatus = prod.status === 'inactive' ? 'active' : 'inactive';
     try {
-      const res = await fetch(`/api/admin/products/${prod.id}`, {
+      const res = await adminFetch(`/api/admin/products/${prod.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
@@ -775,7 +809,7 @@ export default function AdminDashboardPage() {
     setActionLoading(true);
 
     try {
-      const res = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
+      const res = await adminFetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -786,14 +820,16 @@ export default function AdminDashboardPage() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.order) {
         setSelectedOrder(data.order);
         setOrders((prev) => prev.map((o) => (o.id === data.order.id ? data.order : o)));
         showToast(`Order ${data.order.orderNumber} updated to "${orderStatusUpdate}".`);
         loadAllData();
+      } else {
+        showToast(data.message || 'Failed to update order status.');
       }
-    } catch {
-      alert('Failed to update order status.');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update order status.');
     } finally {
       setActionLoading(false);
     }
@@ -804,7 +840,7 @@ export default function AdminDashboardPage() {
   // -------------------------------------------------------------
   const handleStockAdjust = async (productId: string, newStock: number, reason: string) => {
     try {
-      const res = await fetch('/api/admin/inventory', {
+      const res = await adminFetch('/api/admin/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, newStock, reason }),
@@ -829,7 +865,7 @@ export default function AdminDashboardPage() {
   const handleToggleCustomerStatus = async (cust: Customer) => {
     const nextStatus = cust.status === 'active' ? 'suspended' : 'active';
     try {
-      const res = await fetch('/api/admin/customers', {
+      const res = await adminFetch('/api/admin/customers', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: cust.id, status: nextStatus }),
@@ -852,7 +888,7 @@ export default function AdminDashboardPage() {
   // -------------------------------------------------------------
   const handleReviewStatus = async (productId: string, reviewId: string, status: 'approved' | 'rejected') => {
     try {
-      const res = await fetch('/api/admin/reviews', {
+      const res = await adminFetch('/api/admin/reviews', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, reviewId, status }),
@@ -871,7 +907,7 @@ export default function AdminDashboardPage() {
   const handleDeleteReview = async (productId: string, reviewId: string) => {
     if (!confirm('Permanently remove this review?')) return;
     try {
-      const res = await fetch(`/api/admin/reviews?productId=${productId}&reviewId=${reviewId}`, {
+      const res = await adminFetch(`/api/admin/reviews?productId=${productId}&reviewId=${reviewId}`, {
         method: 'DELETE',
       });
       const data = await res.json();
@@ -892,7 +928,7 @@ export default function AdminDashboardPage() {
 
     try {
       if (editingCategory) {
-        const res = await fetch('/api/admin/categories', {
+        const res = await adminFetch('/api/admin/categories', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: editingCategory.slug, updates: catForm }),
@@ -907,7 +943,7 @@ export default function AdminDashboardPage() {
           loadAllData();
         }
       } else {
-        const res = await fetch('/api/admin/categories', {
+        const res = await adminFetch('/api/admin/categories', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(catForm),
@@ -930,7 +966,7 @@ export default function AdminDashboardPage() {
   const handleAddSubcategory = async (categorySlug: string) => {
     if (!newSubcatName || !newSubcatSlug) return;
     try {
-      const res = await fetch('/api/admin/categories', {
+      const res = await adminFetch('/api/admin/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -957,11 +993,11 @@ export default function AdminDashboardPage() {
   const handleDeleteCategory = async (slug: string, name: string) => {
     if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/admin/categories?slug=${slug}`);
+      const res = await adminFetch(`/api/admin/categories?slug=${slug}`);
       const data = await res.json();
       if (!data.success && data.message) {
         if (confirm(`${data.message}\nDo you still wish to force delete?`)) {
-          const forceRes = await fetch(`/api/admin/categories?slug=${slug}&force=true`, {
+          const forceRes = await adminFetch(`/api/admin/categories?slug=${slug}&force=true`, {
             method: 'DELETE',
           });
           const forceData = await forceRes.json();
@@ -972,7 +1008,7 @@ export default function AdminDashboardPage() {
           }
         }
       } else {
-        const delRes = await fetch(`/api/admin/categories?slug=${slug}`, { method: 'DELETE' });
+        const delRes = await adminFetch(`/api/admin/categories?slug=${slug}`, { method: 'DELETE' });
         const delData = await delRes.json();
         if (delData.success) {
           setCategories((prev) => prev.filter((c) => c.slug !== slug));
@@ -991,7 +1027,7 @@ export default function AdminDashboardPage() {
   const handleSaveCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/coupons', {
+      const res = await adminFetch('/api/admin/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(couponForm),
@@ -1012,7 +1048,7 @@ export default function AdminDashboardPage() {
   const handleDeleteCoupon = async (code: string) => {
     if (!confirm(`Delete coupon ${code}?`)) return;
     try {
-      const res = await fetch(`/api/admin/coupons?code=${code}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/admin/coupons?code=${code}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setCoupons((prev) => prev.filter((c) => c.code !== code));
@@ -1028,7 +1064,7 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     try {
       if (editingBanner) {
-        const res = await fetch('/api/admin/banners', {
+        const res = await adminFetch('/api/admin/banners', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editingBanner.id, updates: bannerForm }),
@@ -1041,7 +1077,7 @@ export default function AdminDashboardPage() {
           loadAllData();
         }
       } else {
-        const res = await fetch('/api/admin/banners', {
+        const res = await adminFetch('/api/admin/banners', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(bannerForm),
@@ -1060,7 +1096,7 @@ export default function AdminDashboardPage() {
   const handleDeleteBanner = async (id: string) => {
     if (!confirm('Delete this homepage banner?')) return;
     try {
-      const res = await fetch(`/api/admin/banners?id=${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/admin/banners?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setBanners((prev) => prev.filter((b) => b.id !== id));
@@ -1077,7 +1113,7 @@ export default function AdminDashboardPage() {
     if (!settings) return;
     setActionLoading(true);
     try {
-      const res = await fetch('/api/admin/settings', {
+      const res = await adminFetch('/api/admin/settings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
@@ -1109,7 +1145,7 @@ export default function AdminDashboardPage() {
     formData.append('mode', 'preview');
 
     try {
-      const res = await fetch('/api/admin/import', {
+      const res = await adminFetch('/api/admin/import', {
         method: 'POST',
         body: formData,
       });
@@ -1136,7 +1172,7 @@ export default function AdminDashboardPage() {
     formData.append('mode', 'commit');
 
     try {
-      const res = await fetch('/api/admin/import', {
+      const res = await adminFetch('/api/admin/import', {
         method: 'POST',
         body: formData,
       });
@@ -3015,7 +3051,7 @@ export default function AdminDashboardPage() {
             <PaymentsView
               payments={payments}
               onRefresh={() =>
-                fetch('/api/admin/payments')
+                adminFetch('/api/admin/payments')
                   .then((r) => r.json())
                   .then((d) => d.success && setPayments(d.payments))
               }
@@ -3030,7 +3066,7 @@ export default function AdminDashboardPage() {
             <ShippingView
               shippingRecords={shippingRecords}
               onRefresh={() =>
-                fetch('/api/admin/shipping')
+                adminFetch('/api/admin/shipping')
                   .then((r) => r.json())
                   .then((d) => d.success && setShippingRecords(d.shipping))
               }
@@ -3048,7 +3084,7 @@ export default function AdminDashboardPage() {
               onToggleSound={() => setSoundEnabled((prev) => !prev)}
               onPlayTestChime={playLuxuryChime}
               onRefresh={() =>
-                fetch('/api/admin/notifications')
+                adminFetch('/api/admin/notifications')
                   .then((r) => r.json())
                   .then((d) => {
                     if (d.success) {
@@ -3068,7 +3104,7 @@ export default function AdminDashboardPage() {
             <UsersView
               adminUsers={adminUsers}
               onRefresh={() =>
-                fetch('/api/admin/users')
+                adminFetch('/api/admin/users')
                   .then((r) => r.json())
                   .then((d) => d.success && setAdminUsers(d.users))
               }
@@ -3083,7 +3119,7 @@ export default function AdminDashboardPage() {
             <ActivityLogsView
               logs={activityLogs}
               onRefresh={() =>
-                fetch('/api/admin/logs')
+                adminFetch('/api/admin/logs')
                   .then((r) => r.json())
                   .then((d) => d.success && setActivityLogs(d.logs))
               }

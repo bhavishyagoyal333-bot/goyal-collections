@@ -69,7 +69,7 @@ export default function Header() {
       {/* Fixed Floating Capsule Glassic Header (Always Visible on Scroll) */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full px-2 sm:px-4 pt-2 sm:pt-3 pointer-events-none transition-all">
         <div className="max-w-7xl mx-auto rounded-full glassic-header pointer-events-auto px-2.5 sm:px-5 py-1.5 sm:py-2 flex items-center justify-between border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.25)] relative">
-          
+
           {/* ======================================================= */}
           {/* LEFT: Three-Line Hamburger Menu + Brand Logo (LEFT SIDE) */}
           {/* ======================================================= */}
@@ -156,9 +156,8 @@ export default function Header() {
                   e.stopPropagation();
                   setIsProfileOpen((prev) => !prev);
                 }}
-                className={`glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white relative group ${
-                  user ? 'ring-1 ring-white/60 bg-white/20' : ''
-                }`}
+                className={`glassic-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white relative group ${user ? 'ring-1 ring-white/60 bg-white/20' : ''
+                  }`}
                 aria-expanded={isProfileOpen}
                 aria-label="User Profile"
               >
@@ -324,7 +323,7 @@ export default function Header() {
 
           {/* Drawer Panel with Frosted Glassic Look */}
           <div className="fixed top-0 left-0 bottom-0 w-full max-w-sm sm:max-w-md bg-neutral-950/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl flex flex-col z-50 animate-slide-right overflow-y-auto text-white">
-            
+
             {/* Drawer Header */}
             <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.03] backdrop-blur-md">
               <Link
@@ -347,7 +346,7 @@ export default function Header() {
 
             {/* Drawer Content */}
             <div className="p-5 sm:p-6 space-y-4 flex-1">
-              
+
               {/* Category 1: Footwear Accordion Dropdown */}
               <div className="rounded-2xl glassic-card overflow-hidden transition-all">
                 <button
@@ -365,9 +364,8 @@ export default function Header() {
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-mono text-neutral-400 px-2 py-0.5 rounded-full bg-neutral-800">5 Lines</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
-                        openAccordion === 'footwear' ? 'rotate-180 text-white' : ''
-                      }`}
+                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${openAccordion === 'footwear' ? 'rotate-180 text-white' : ''
+                        }`}
                     />
                   </div>
                 </button>
@@ -419,9 +417,8 @@ export default function Header() {
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-mono text-neutral-400 px-2 py-0.5 rounded-full bg-neutral-800">5 Lines</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
-                        openAccordion === 'ready-made' ? 'rotate-180 text-white' : ''
-                      }`}
+                      className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${openAccordion === 'ready-made' ? 'rotate-180 text-white' : ''
+                        }`}
                     />
                   </div>
                 </button>
@@ -471,9 +468,8 @@ export default function Header() {
                     </div>
                   </div>
                   <ChevronDown
-                    className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
-                      openAccordion === 'concierge' ? 'rotate-180 text-white' : ''
-                    }`}
+                    className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${openAccordion === 'concierge' ? 'rotate-180 text-white' : ''
+                      }`}
                   />
                 </button>
 

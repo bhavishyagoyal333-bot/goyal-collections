@@ -19,24 +19,59 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!body.customerName || !body.phone || !body.shippingAddress || !body.items || body.items.length === 0) {
+    const customerName = (
+      body.customerName ||
+      body.shippingAddress?.fullName ||
+      body.shippingAddress?.name ||
+      body.name ||
+      'Valued Connoisseur'
+    ).trim();
+
+    const phone = (
+      body.phone ||
+      body.customerPhone ||
+      body.shippingAddress?.phone ||
+      body.shippingAddress?.mobile ||
+      ''
+    ).trim();
+
+    const email = (
+      body.email ||
+      body.customerEmail ||
+      body.shippingAddress?.email ||
+      'customer@goyalcollections.shop'
+    ).trim();
+
+    const shippingAddress = body.shippingAddress || body.address;
+    const items = body.items || [];
+
+    if (!customerName || !phone || !shippingAddress || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: 'Missing required order details (customerName, phone, address, items).' },
+        {
+          success: false,
+          message: 'Missing required order details (customerName, phone, address, items).',
+          details: {
+            hasCustomerName: !!customerName,
+            hasPhone: !!phone,
+            hasAddress: !!shippingAddress,
+            itemCount: items.length,
+          },
+        },
         { status: 400 }
       );
     }
 
     const order = createOrder({
-      customerName: body.customerName,
-      email: body.email || 'customer@mirli.store',
-      phone: body.phone,
-      shippingAddress: body.shippingAddress,
-      items: body.items,
+      customerName,
+      email,
+      phone,
+      shippingAddress: typeof shippingAddress === 'object' ? shippingAddress : { fullAddress: String(shippingAddress) },
+      items,
       subtotal: Number(body.subtotal || 0),
       discount: Number(body.discount || 0),
       couponCode: body.couponCode || undefined,
-      deliveryCharge: Number(body.deliveryCharge || 0),
-      totalAmount: Number(body.totalAmount || 0),
+      deliveryCharge: Number(body.deliveryCharge ?? body.shippingFee ?? 0),
+      totalAmount: Number(body.totalAmount ?? body.total ?? 0),
       paymentMethod: body.paymentMethod || 'COD',
       paymentId: body.paymentId,
     });

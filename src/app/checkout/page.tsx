@@ -76,20 +76,34 @@ export default function CheckoutPage() {
     setErrorMessage('');
 
     try {
+      const customerName = (activeAddress.fullName || (activeAddress as any).name || user?.name || 'Valued Customer').trim();
+      const phone = (activeAddress.phone || (activeAddress as any).mobile || user?.phone || '').trim();
+      const email = (activeAddress.email || user?.email || 'customer@goyalcollections.shop').trim();
+
       const orderPayload = {
         userId: user ? user.id : 'guest',
-        customerName: activeAddress.fullName,
-        customerEmail: activeAddress.email || user?.email || 'guest@mirli.com',
-        customerPhone: activeAddress.phone,
+        customerName,
+        phone,
+        customerPhone: phone,
+        email,
+        customerEmail: email,
         items: cartItems,
-        shippingAddress: activeAddress,
+        shippingAddress: {
+          ...activeAddress,
+          fullName: customerName,
+          phone,
+          email,
+        },
+        address: activeAddress,
         paymentMethod,
         paymentStatus: paymentMethod === 'ONLINE' ? 'PAID' : 'PENDING',
-        subtotal,
-        discount: couponDiscount,
+        subtotal: Number(subtotal || 0),
+        discount: Number(couponDiscount || 0),
         couponCode: appliedCoupon?.code,
-        shippingFee: deliveryCharge,
-        total: finalTotal,
+        shippingFee: Number(deliveryCharge || 0),
+        deliveryCharge: Number(deliveryCharge || 0),
+        total: Number(finalTotal || 0),
+        totalAmount: Number(finalTotal || 0),
       };
 
       const res = await fetch('/api/orders', {
