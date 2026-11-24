@@ -11,6 +11,9 @@ interface AddressFormProps {
   submitButtonText?: string;
 }
 
+// Client-side instant memory cache for 0ms pincode lookups
+const clientPincodeCache = new Map<string, any>();
+
 export default function AddressForm({
   initialAddress,
   onSubmit,
@@ -54,6 +57,26 @@ export default function AddressForm({
   useEffect(() => {
     const clean = pincode.trim().replace(/\D/g, '');
     if (clean.length === 6) {
+      // 0ms instant check from client memory cache
+      const cached = clientPincodeCache.get(clean);
+      if (cached) {
+        setDistrict(cached.district || '');
+        setState(cached.state || '');
+        if (Array.isArray(cached.postOffices) && cached.postOffices.length > 0) {
+          setPostOfficesList(cached.postOffices);
+          setArea((prev) => prev || cached.postOffices[0]);
+        } else {
+          setArea((prev) => prev || cached.district || '');
+        }
+        setPinStatus({
+          success: true,
+          message: `Verified: ${cached.district}, ${cached.state} (Serviceable Delivery Zone)`,
+          deliveryDays: cached.deliveryDays || 3,
+        });
+        setLoadingPin(false);
+        return;
+      }
+
       setLoadingPin(true);
       setPinStatus(null);
 
@@ -61,6 +84,7 @@ export default function AddressForm({
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
+            clientPincodeCache.set(clean, data);
             setDistrict(data.district || '');
             setState(data.state || '');
             if (Array.isArray(data.postOffices) && data.postOffices.length > 0) {

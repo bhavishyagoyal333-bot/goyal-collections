@@ -7,6 +7,9 @@ interface PincodeCheckerProps {
   onPincodeVerified?: (info: { pincode: string; district: string; state: string; days: number }) => void;
 }
 
+// Client-side memory cache for instant pincode resolution
+const clientPincodeCheckerCache = new Map<string, any>();
+
 export default function PincodeChecker({ onPincodeVerified }: PincodeCheckerProps) {
   const [pincode, setPincode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,11 +33,43 @@ export default function PincodeChecker({ onPincodeVerified }: PincodeCheckerProp
     setLoading(true);
     setResult(null);
 
+    const cached = clientPincodeCheckerCache.get(cleanPin);
+    if (cached) {
+      const estDate = new Date();
+      estDate.setDate(estDate.getDate() + (cached.deliveryDays || 3));
+      const dateStr = estDate.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      setResult({
+        valid: true,
+        district: cached.district,
+        state: cached.state,
+        postOffices: cached.postOffices,
+        days: cached.deliveryDays || 3,
+        message: `Delivery by ${dateStr} • Express & COD Available`,
+      });
+
+      if (onPincodeVerified) {
+        onPincodeVerified({
+          pincode: cleanPin,
+          district: cached.district,
+          state: cached.state,
+          days: cached.deliveryDays || 3,
+        });
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/pincode/${cleanPin}`);
       const data = await res.json();
 
       if (data.success) {
+        clientPincodeCheckerCache.set(cleanPin, data);
         const estDate = new Date();
         estDate.setDate(estDate.getDate() + (data.deliveryDays || 3));
         const dateStr = estDate.toLocaleDateString('en-IN', {

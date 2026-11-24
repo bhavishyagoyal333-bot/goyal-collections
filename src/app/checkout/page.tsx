@@ -115,6 +115,17 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (data.success && data.order) {
+        // Store in localStorage for instant offline/cross-session sync
+        try {
+          const stored = localStorage.getItem('mirli_placed_orders');
+          const existing = stored ? JSON.parse(stored) : [];
+          const updated = [
+            data.order,
+            ...existing.filter((o: any) => o.id !== data.order.id && o.orderNumber !== data.order.orderNumber),
+          ];
+          localStorage.setItem('mirli_placed_orders', JSON.stringify(updated));
+        } catch {}
+
         setOrderPlaced(true);
         clearCart();
         router.push(`/order-confirmation/${data.order.id}`);

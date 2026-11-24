@@ -1086,15 +1086,49 @@ export function getOrders(filter?: {
   const db = initDB();
   let orders = [...db.orders];
 
-  if (filter?.email) {
-    orders = orders.filter((o) => o.email.toLowerCase() === filter.email!.toLowerCase());
+  const cleanEmail = filter?.email ? filter.email.trim().toLowerCase() : '';
+  const cleanPhone = filter?.phone ? filter.phone.replace(/\D/g, '') : '';
+
+  if (cleanEmail && cleanPhone) {
+    orders = orders.filter((o) => {
+      const oEmail = (o.email || '').toLowerCase().trim();
+      const oShipEmail = (o.shippingAddress?.email || '').toLowerCase().trim();
+      const oPhone = (o.phone || '').replace(/\D/g, '');
+      const oShipPhone = (o.shippingAddress?.phone || '').replace(/\D/g, '');
+
+      const matchEmail = (cleanEmail && (oEmail === cleanEmail || oShipEmail === cleanEmail));
+      const matchPhone = (cleanPhone && (
+        oPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oPhone) ||
+        oShipPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oShipPhone)
+      ));
+
+      return matchEmail || matchPhone;
+    });
+  } else if (cleanEmail) {
+    orders = orders.filter((o) => {
+      const oEmail = (o.email || '').toLowerCase().trim();
+      const oShipEmail = (o.shippingAddress?.email || '').toLowerCase().trim();
+      return oEmail === cleanEmail || oShipEmail === cleanEmail;
+    });
+  } else if (cleanPhone) {
+    orders = orders.filter((o) => {
+      const oPhone = (o.phone || '').replace(/\D/g, '');
+      const oShipPhone = (o.shippingAddress?.phone || '').replace(/\D/g, '');
+      return (
+        oPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oPhone) ||
+        oShipPhone.includes(cleanPhone) ||
+        cleanPhone.includes(oShipPhone)
+      );
+    });
   }
-  if (filter?.phone) {
-    orders = orders.filter((o) => o.phone.includes(filter.phone!));
-  }
+
   if (filter?.status) {
     orders = orders.filter((o) => o.orderStatus === filter.status);
   }
+
   if (filter?.search) {
     const q = filter.search.toLowerCase().trim();
     orders = orders.filter(

@@ -16,12 +16,44 @@ export default function MyOrdersPage() {
     async function fetchOrders() {
       setLoading(true);
       try {
-        const query = user?.email ? `email=${encodeURIComponent(user.email)}` : '';
-        const res = await fetch(`/api/orders?${query}`);
-        const data = await res.json();
-        if (data.success) {
-          setOrders(data.orders || []);
+        const params = new URLSearchParams();
+        if (user?.email) params.set('email', user.email);
+        if (user?.phone) params.set('phone', user.phone);
+
+        // Also query phone from saved addresses if available
+        if (user?.addresses && user.addresses.length > 0) {
+          const altPhone = user.addresses.find((a) => a.phone && a.phone !== user.phone)?.phone;
+          if (altPhone && !params.has('phone')) {
+            params.set('phone', altPhone);
+          }
         }
+
+        const res = await fetch(`/api/orders?${params.toString()}`);
+        const data = await res.json();
+
+        // Retrieve any locally recorded placed orders
+        const localOrders: Order[] = [];
+        try {
+          const saved = localStorage.getItem('mirli_placed_orders');
+          if (saved) {
+            localOrders.push(...JSON.parse(saved));
+          }
+        } catch {}
+
+        const orderMap = new Map<string, Order>();
+        if (data.success && Array.isArray(data.orders)) {
+          data.orders.forEach((o: Order) => orderMap.set(o.orderNumber, o));
+        }
+        localOrders.forEach((o: Order) => {
+          if (!orderMap.has(o.orderNumber)) {
+            orderMap.set(o.orderNumber, o);
+          }
+        });
+
+        const combined = Array.from(orderMap.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setOrders(combined);
       } catch (e) {
         console.error(e);
       } finally {
