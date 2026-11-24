@@ -111,7 +111,7 @@ export default function MyOrdersPage() {
                     </span>
                   </div>
                   <span className="text-neutral-400 font-mono text-[11px] block mt-1">
-                    Ordered on {new Date(ord.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    Ordered on <strong className="text-white font-medium">{new Date(ord.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(ord.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</strong>
                   </span>
                 </div>
 

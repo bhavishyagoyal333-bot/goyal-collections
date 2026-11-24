@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 export type AppEventType =
   | 'order:created'
   | 'order:updated'
+  | 'order:deleted'
   | 'product:created'
   | 'product:updated'
   | 'product:deleted'

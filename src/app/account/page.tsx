@@ -174,7 +174,7 @@ export default function AccountPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-neutral-400 font-mono text-[11px]">
-                          <span>Placed: {new Date(ord.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          <span>Placed: <strong className="text-white font-medium">{new Date(ord.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(ord.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</strong></span>
                           <span>•</span>
                           <span className="text-white font-bold">₹{ord.totalAmount.toLocaleString('en-IN')}</span>
                         </div>

@@ -77,8 +77,10 @@ export default function OrderConfirmationPage({ params }: { params: { orderId: s
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-4 p-3 rounded-2xl bg-white border border-neutral-200 text-xs font-mono shadow-sm">
-          <span>Order Reference: <strong className="text-black">{order.orderNumber}</strong></span>
+        <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-4 p-3.5 rounded-2xl bg-white border border-neutral-200 text-xs font-mono shadow-sm">
+          <span>Order Ref: <strong className="text-black">{order.orderNumber}</strong></span>
+          <span>•</span>
+          <span>Placed: <strong className="text-emerald-700">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</strong></span>
           <span>•</span>
           <span>Est. Delivery: <strong className="text-black">{order.estimatedDeliveryDate}</strong></span>
         </div>
@@ -88,7 +90,7 @@ export default function OrderConfirmationPage({ params }: { params: { orderId: s
       <div className="bg-white p-6 sm:p-10 rounded-3xl border border-neutral-200 space-y-8 shadow-sm">
         
         {/* Top Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pb-6 border-b border-neutral-200 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-6 border-b border-neutral-200 text-xs">
           <div>
             <span className="text-neutral-500 uppercase font-mono block mb-1">Customer</span>
             <span className="font-semibold text-black block">{order.customerName}</span>
@@ -116,6 +118,16 @@ export default function OrderConfirmationPage({ params }: { params: { orderId: s
             </span>
             <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
               {order.paymentStatus}
+            </span>
+          </div>
+
+          <div>
+            <span className="text-neutral-500 uppercase font-mono block mb-1">Exact Placed Time</span>
+            <span className="font-semibold text-black block">
+              {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </span>
+            <span className="text-emerald-700 font-mono font-medium block mt-0.5">
+              {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </span>
           </div>
         </div>

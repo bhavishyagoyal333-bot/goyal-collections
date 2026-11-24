@@ -172,6 +172,9 @@ function OrderTrackingContent() {
                   {order.orderStatus.toUpperCase()}
                 </span>
               </div>
+              <span className="text-neutral-400 font-mono text-[11px] block mt-1.5">
+                Placed On: <strong className="text-white font-medium">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</strong>
+              </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">

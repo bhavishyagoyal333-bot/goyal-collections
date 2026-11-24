@@ -1148,11 +1148,23 @@ export function createOrder(data: {
     year: 'numeric',
   });
 
+  const exactDateStr = now.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const exactTimeStr = now.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+
   const trackingTimeline: Order['trackingTimeline'] = [
     {
       status: 'Order Placed',
-      date: now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      time: now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      date: exactDateStr,
+      time: exactTimeStr,
       location: 'GOYAL COLLECTIONS Atelier, New Delhi',
       description: 'Your order has been recorded in our fulfillment queue.',
       completed: true,
@@ -1236,8 +1248,8 @@ export function createOrder(data: {
     statusHistory: [
       {
         status: 'Order Placed',
-        date: now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-        time: now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        date: exactDateStr,
+        time: exactTimeStr,
         note: 'Order successfully recorded.',
         updatedBy: 'Customer Checkout',
       },
@@ -1390,8 +1402,8 @@ export function updateOrderStatus(
   const previousStatus = order.orderStatus;
   const adminEmail = options?.adminEmail || 'admin@mirli.store';
   const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
   order.orderStatus = newStatus;
   order.updatedAt = now.toISOString();
@@ -1524,6 +1536,74 @@ export function updateOrderStatus(
   emitRealtimeEvent('order:updated', order);
 
   return order;
+}
+
+export function deleteOrder(orderIdOrNumber: string, adminEmail = 'admin@mirli.store'): boolean {
+  const db = initDB();
+  const clean = decodeURIComponent(orderIdOrNumber || '').trim().toLowerCase();
+  const orderIdx = db.orders.findIndex(
+    (o) => o.id === orderIdOrNumber || o.orderNumber === orderIdOrNumber || o.id.toLowerCase() === clean || o.orderNumber.toLowerCase() === clean
+  );
+  if (orderIdx === -1) return false;
+
+  const order = db.orders[orderIdx];
+  db.orders.splice(orderIdx, 1);
+
+  // Sync payments
+  if (db.payments) {
+    db.payments = db.payments.filter((p) => p.orderId !== order.id && p.orderNumber !== order.orderNumber);
+  }
+  // Sync shipping
+  if (db.shipping) {
+    db.shipping = db.shipping.filter((s) => s.orderId !== order.id && s.orderNumber !== order.orderNumber);
+  }
+  // Sync customer stats
+  const cust = db.customers.find(
+    (c) => c.email.toLowerCase() === order.email.toLowerCase() || c.phone === order.phone
+  );
+  if (cust) {
+    cust.totalOrders = Math.max(0, (cust.totalOrders || 1) - 1);
+    cust.totalSpending = Math.max(0, (cust.totalSpending || order.totalAmount) - order.totalAmount);
+  }
+
+  logAdminActivity('Order Deleted', 'Order', `Order ${order.orderNumber} deleted`, adminEmail);
+  saveDB(db);
+  emitRealtimeEvent('order:deleted', { orderId: order.id, orderNumber: order.orderNumber });
+  return true;
+}
+
+export function deleteOrdersByCustomer(query: string, adminEmail = 'admin@mirli.store'): number {
+  const db = initDB();
+  const clean = query.trim().toLowerCase();
+  const matchingOrders = db.orders.filter(
+    (o) => o.email.toLowerCase() === clean || o.phone.replace(/[^0-9]/g, '').includes(clean) || o.customerName.toLowerCase().includes(clean)
+  );
+
+  const deletedIds = new Set(matchingOrders.map((o) => o.id));
+  const deletedNumbers = new Set(matchingOrders.map((o) => o.orderNumber));
+
+  db.orders = db.orders.filter((o) => !deletedIds.has(o.id));
+
+  if (db.payments) {
+    db.payments = db.payments.filter((p) => !deletedIds.has(p.orderId) && !deletedNumbers.has(p.orderNumber));
+  }
+  if (db.shipping) {
+    db.shipping = db.shipping.filter((s) => !deletedIds.has(s.orderId) && !deletedNumbers.has(s.orderNumber));
+  }
+
+  // Reset matching customer stats
+  const cust = db.customers.find(
+    (c) => c.email.toLowerCase() === clean || c.phone.replace(/[^0-9]/g, '').includes(clean)
+  );
+  if (cust) {
+    cust.totalOrders = 0;
+    cust.totalSpending = 0;
+  }
+
+  logAdminActivity('Customer Orders Cleared', 'Order', `Cleared ${matchingOrders.length} orders for ${query}`, adminEmail);
+  saveDB(db);
+  emitRealtimeEvent('order:deleted', { query, count: matchingOrders.length });
+  return matchingOrders.length;
 }
 
 // ================= INVENTORY =================

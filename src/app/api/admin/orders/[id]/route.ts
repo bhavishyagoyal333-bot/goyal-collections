@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updateOrderStatus } from '@/lib/db';
+import { getOrderById, updateOrderStatus, deleteOrder } from '@/lib/db';
 import { checkAdminAuth } from '@/lib/adminAuth';
 import { OrderStatus } from '@/lib/types';
 
@@ -59,4 +59,27 @@ export async function PATCH(
 }
 
 export const PUT = PATCH;
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const auth = checkAdminAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const id = params.id;
+    const deleted = deleteOrder(id, auth.email);
+
+    if (!deleted) {
+      return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Order successfully deleted' });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
 

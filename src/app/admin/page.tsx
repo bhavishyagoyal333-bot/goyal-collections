@@ -1865,7 +1865,10 @@ export default function AdminDashboardPage() {
                             <span className="text-[10px] text-neutral-500 font-mono">{ord.phone}</span>
                           </td>
                           <td className="py-3.5 text-neutral-400 font-mono text-[11px]">
-                            {new Date(ord.createdAt).toLocaleDateString('en-IN')}
+                            <div>{new Date(ord.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                            <span className="block text-[10px] text-neutral-500">
+                              {new Date(ord.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                            </span>
                           </td>
                           <td className="py-3.5">
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase font-semibold ${
@@ -3589,7 +3592,7 @@ export default function AdminDashboardPage() {
                   ORDER: {selectedOrder.orderNumber}
                 </span>
                 <span className="text-[11px] font-mono text-neutral-400">
-                  Placed on {new Date(selectedOrder.createdAt).toLocaleString('en-IN')}
+                  Placed on {new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}, {new Date(selectedOrder.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -3723,14 +3726,42 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={handleUpdateOrder}
-                disabled={actionLoading}
-                className="w-full py-2.5 rounded-full bg-white text-black font-bold uppercase tracking-wider text-xs hover:bg-neutral-200 transition-colors"
-              >
-                {actionLoading ? 'Updating...' : 'Commit Status Update to Customer'}
-              </button>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleUpdateOrder}
+                  disabled={actionLoading}
+                  className="flex-1 py-2.5 rounded-full bg-white text-black font-bold uppercase tracking-wider text-xs hover:bg-neutral-200 transition-colors"
+                >
+                  {actionLoading ? 'Updating...' : 'Commit Status Update to Customer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm(`Are you sure you want to permanently delete order ${selectedOrder.orderNumber}?`)) return;
+                    setActionLoading(true);
+                    try {
+                      const res = await adminFetch(`/api/admin/orders/${selectedOrder.id}`, { method: 'DELETE' });
+                      const d = await res.json();
+                      if (d.success) {
+                        showToast('Order permanently deleted.');
+                        setSelectedOrder(null);
+                        loadAllData();
+                      } else {
+                        showToast(d.message || 'Failed to delete order');
+                      }
+                    } catch (e: any) {
+                      showToast(e.message || 'Error deleting order');
+                    } finally {
+                      setActionLoading(false);
+                    }
+                  }}
+                  disabled={actionLoading}
+                  className="px-4 py-2.5 rounded-full bg-red-950/60 hover:bg-red-900 border border-red-800 text-red-300 font-bold uppercase tracking-wider text-xs transition-colors"
+                >
+                  Delete Order
+                </button>
+              </div>
             </div>
           </div>
         </div>

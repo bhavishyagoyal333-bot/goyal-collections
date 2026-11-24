@@ -15,11 +15,16 @@ export default function PrintInvoiceModal({ order, onClose }: PrintInvoiceModalP
   };
 
   const invoiceNumber = `GC-INV-${order.orderNumber.replace(/[^0-9]/g, '') || Math.floor(100000 + Math.random() * 900000)}`;
-  const invoiceDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
-    day: 'numeric',
+  const invoiceDate = `${new Date(order.createdAt).toLocaleDateString('en-IN', {
+    day: '2-digit',
     month: 'short',
     year: 'numeric',
-  });
+  })}, ${new Date(order.createdAt).toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  })}`;
 
   const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const taxAmount = Math.round(order.totalAmount * 0.05); // 5% GST included

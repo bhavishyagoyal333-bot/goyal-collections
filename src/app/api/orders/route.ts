@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrders, createOrder } from '@/lib/db';
+import { getOrders, createOrder, deleteOrder, deleteOrdersByCustomer } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,6 +77,36 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, order }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const orderId = searchParams.get('orderId') || searchParams.get('id');
+    const email = searchParams.get('email');
+    const phone = searchParams.get('phone');
+
+    if (orderId) {
+      const deleted = deleteOrder(orderId, email || 'customer');
+      if (!deleted) {
+        return NextResponse.json({ success: false, message: 'Order not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, message: `Order ${orderId} deleted` });
+    }
+
+    if (email || phone) {
+      const target = (email || phone) as string;
+      const count = deleteOrdersByCustomer(target, 'customer-request');
+      return NextResponse.json({ success: true, message: `Deleted ${count} orders for ${target}`, deletedCount: count });
+    }
+
+    return NextResponse.json(
+      { success: false, message: 'Provide orderId, email, or phone to delete orders' },
+      { status: 400 }
+    );
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
